@@ -4,6 +4,7 @@ import { Encounter } from '../../models/encounter.model';
 import * as _ from 'lodash';
 import { EncounterResourceService } from '../../openmrs-api/encounter-resource.service';
 import { ModalComponent } from 'ng2-bs3-modal/ng2-bs3-modal';
+import * as moment from 'moment';
 
 @Component({
   selector: 'patient-encounter-observations',
@@ -24,7 +25,7 @@ export class PatientEncounterObservationsComponent implements OnInit, OnChanges 
   @Input() encounter: Encounter;
   @Input() onEncounterDetail: boolean;
   @Output() onClose = new EventEmitter();
-  @Output() isDone = new EventEmitter();
+  @Output() isBusy = new EventEmitter();
   @Output() onDismiss = new EventEmitter();
   cssClass: string = 'obs-dialog';
 
@@ -42,7 +43,7 @@ export class PatientEncounterObservationsComponent implements OnInit, OnChanges 
       let changedProp = changes[propName];
       let encounter = changedProp.currentValue;
       if (!changedProp.isFirstChange()) {
-        this.isDone.emit(true);
+        this.isBusy.emit(true);
         this.encounterResource.getEncounterByUuid(encounter.uuid).subscribe((_encounter) => {
           this.modal.dismiss();
           this.modal.open();
@@ -71,6 +72,7 @@ export class PatientEncounterObservationsComponent implements OnInit, OnChanges 
   }
 
   processEncounter(encounter: any) {
+    console.warn(encounter);
     const obs = encounter.obs;
     let processedObs: any = [];
     obs.sort((a, b) => {
@@ -81,11 +83,14 @@ export class PatientEncounterObservationsComponent implements OnInit, OnChanges 
 
     _.each(obs, (v, i) => {
       this.isHidden[i] = true;
-      let _value: any = _.isObject(v.value) ? v.value.display : v.value;
+      let _value: any = this.formatValueIfDate(v);
       let _arrValue: Array<any> = [];
       if (_.isNil(_value) && !_.isNil(v.groupMembers)) {
         _.each(v.groupMembers, (group, index) => {
-          _arrValue.push({label: group.concept.display.toUpperCase(), value: group.value.display});
+          _arrValue.push({
+            label: group.concept.display.toUpperCase(),
+            value: this.formatValueIfDate(group)
+          });
         });
         _value = _arrValue;
       }
@@ -95,8 +100,14 @@ export class PatientEncounterObservationsComponent implements OnInit, OnChanges 
         value: _value
       });
     });
-    this.isDone.emit(false);
+    this.isBusy.emit(false);
     return processedObs;
+  }
+
+  formatValueIfDate(value: any) {
+    let _value: any = _.isObject(value.value) ? value.value.display : value.value;
+    return moment(_value, moment.ISO_8601, true).isValid() ?
+      moment(_value).format('DD/MM/YYYY') : _value;
   }
 
 }
