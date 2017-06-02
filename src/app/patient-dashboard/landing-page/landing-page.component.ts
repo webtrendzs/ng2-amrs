@@ -19,7 +19,7 @@ import * as moment from 'moment';
 
 export class LandingPageComponent implements OnInit, OnDestroy {
 
-  patient: Patient  = new Patient({});
+  patient: Patient = new Patient({});
   subscription: Subscription;
   enrolledProgrames: Array<ProgramEnrollment> = [];
   currentError: string;
@@ -29,7 +29,12 @@ export class LandingPageComponent implements OnInit, OnDestroy {
   programsBusy: boolean = false;
   program: string = '';
   errors: Array<any> = [];
+  isFocused: boolean = false;
+  dateEnrolled: string;
+  isEdit: boolean = false;
+  dateCompleted: string;
   private _datePipe: DatePipe;
+
   constructor(private patientService: PatientService,
               private routesProviderService: RoutesProviderService,
               private programService: ProgramService) {
@@ -68,9 +73,9 @@ export class LandingPageComponent implements OnInit, OnDestroy {
         _.each(data[1], (program) => {
           let _enrolledPrograms: Array<any> = _.filter(this.enrolledProgrames,
             (enrolledProgram) => {
-            return enrolledProgram.programUuid === program.uuid &&
-              _.isNil(enrolledProgram.dateCompleted);
-          });
+              return enrolledProgram.programUuid === program.uuid &&
+                _.isNil(enrolledProgram.dateCompleted);
+            });
           let _enrolledProgram: any;
           if (_enrolledPrograms.length > 0) {
             _enrolledProgram = _.last(_enrolledPrograms);
@@ -85,6 +90,7 @@ export class LandingPageComponent implements OnInit, OnDestroy {
             enrolledProgram: _enrolledProgram,
             programUuid: _.isNil(_enrolledProgram) ? '' : _enrolledProgram.uuid,
             isFocused: false,
+            isEdit: false,
             dateEnrolled: (!_.isNil(_enrolledProgram) && _.isNil(_enrolledProgram.dateCompleted)) ?
               this._datePipe.transform(_enrolledProgram.dateEnrolled, 'yyyy-MM-dd') : null,
             dateCompleted: null,
@@ -95,12 +101,6 @@ export class LandingPageComponent implements OnInit, OnDestroy {
                 display: 'Go to program',
                 url: route ? '/patient-dashboard/' + patientUuid + '/' +
                 route.baseRoute + '/visit' : null
-              },
-              enroll: {
-                display: 'Enroll patient'
-              },
-              edit: {
-                display: 'Complete Program',
               }
             },
             isEnrolled: !_.isNil(_enrolledProgram) && _.isNil(_enrolledProgram.dateCompleted)
@@ -154,14 +154,30 @@ export class LandingPageComponent implements OnInit, OnDestroy {
     }).first();
   }
 
-  createOrEditPatientEnrollment(row: any, isNew: boolean) {
+  toggleDropDown(row: any) {
+    row.isEdit = _.isNil(row.isEdit) ? true : !<boolean>row.isEdit;
+  }
+
+  editPatientEnrollment(row: any) {
     row.isFocused = true;
+    this.isEdit = true;
     if (this.isValidForm(row)) {
-      if (isNew) {
-        delete row.programUuid;
-      }
       let payload = this.programService.createEnrollmentPayload(
         row.program.uuid, this.patient, row.dateEnrolled, row.dateCompleted, row.programUuid);
+      if (payload) {
+        setTimeout(() => {
+          this._updatePatientProgramEnrollment(payload);
+        }, 3000);
+      }
+    }
+  }
+
+  enrollPatientToProgram() {
+    this.isFocused = true;
+    this.isEdit = false;
+    if (this.isValidForm({dateEnrolled: this.dateEnrolled})) {
+      let payload = this.programService.createEnrollmentPayload(
+        this.program, this.patient, this.dateEnrolled, this.dateCompleted, '');
       if (payload) {
         this._updatePatientProgramEnrollment(payload);
       }
@@ -171,6 +187,14 @@ export class LandingPageComponent implements OnInit, OnDestroy {
   isValidForm(row: any) {
     if (!this._formFieldsValid(row.dateEnrolled, row.dateCompleted)) {
       row.validationError = this.currentError;
+      this.isFocused = false;
+      if (this.isEdit) {
+        this.currentError = '';
+        if (!_.isNil(row.isFocused)) {
+          row.isFocused = false;
+        }
+        ;
+      }
     } else {
       row.validationError = '';
       this.hasValidationErrors = false;
@@ -178,35 +202,31 @@ export class LandingPageComponent implements OnInit, OnDestroy {
     return !this.hasValidationErrors;
   }
 
-  editEnrollment(programEnrollment: any) {
-    this.createOrEditPatientEnrollment(programEnrollment, false);
-  }
-
-  cancelEnrollment(row: any) {
-    row.isFocused = false;
-    row.dateCompleted = null;
-    row.dateEnrolled = null;
-    row.validationError = '';
-  }
-
   private _updatePatientProgramEnrollment(payload) {
     this.programService.saveUpdateProgramEnrollment(payload).subscribe(
       (enrollment) => {
+        this.isFocused = false;
         if (enrollment) {
           this.patientService.fetchPatientByUuid(this.patient.uuid);
+          this._resetVariables();
         }
       }
     );
   }
 
   private _formFieldsValid(enrolledDate, completedDate) {
+    if (!this.isEdit && this.program === '') {
+      this._showErrorMessage('Program is required.');
+      return false;
+    }
 
     if (_.isNil(enrolledDate) || (!_.isNil(completedDate) && _.isNil(completedDate))) {
       this._showErrorMessage('Date Enrolled is required.');
       return false;
     }
 
-    if (!_.isNil(completedDate) && !moment(completedDate).isAfter(enrolledDate)) {
+    if ((!_.isNil(completedDate) && !moment(completedDate).isAfter(enrolledDate)) ||
+      (this.isEdit && _.isNil(completedDate))) {
       this._showErrorMessage('Date Completed should be after Date Enrolled');
       return false;
     }
@@ -221,7 +241,8 @@ export class LandingPageComponent implements OnInit, OnDestroy {
 
   private _isFutureDates(enrolledDate, completedDate) {
     let today = new Date();
-    if (moment(enrolledDate).isAfter(today) || moment(completedDate).isAfter(today)) {
+    if (moment(enrolledDate).isAfter(today) || (!_.isNil(completedDate)
+      && moment(completedDate).isAfter(today))) {
       return true;
     }
     return false;
@@ -239,6 +260,7 @@ export class LandingPageComponent implements OnInit, OnDestroy {
     this.hasError = false;
     this.hasValidationErrors = false;
     this.currentError = '';
+    this.isEdit = false;
     this.errors = [];
   }
 
