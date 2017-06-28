@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output,
   EventEmitter, OnChanges , SimpleChanges } from '@angular/core';
 
-import * as _ from 'underscore';
+import * as _ from 'lodash';
 import * as Moment from 'moment';
 
 import { LabOrdersSearchHelperService } from './lab-order-search-helper.service';
@@ -43,11 +43,13 @@ export class LabOrderSearchPostComponent implements OnInit, OnChanges {
   };
 
   labLocations: any;
+  patientIdentifers: Array<any>;
   sampleTypes: any;
   orderTypes: any;
   isBusy: boolean = true;
 
   selectedLabLocation: any;
+  selectedIdentifier: string;
   selectedSampleType: any;
   dateReceived: any;
   orderPostSuccessful: boolean;
@@ -79,6 +81,9 @@ export class LabOrderSearchPostComponent implements OnInit, OnChanges {
   }
 
   displayOrder() {
+    this.processPatientIdentifiers().then((identifiers: Array<any>) => {
+      this.patientIdentifers = identifiers;
+    });
     this.patient = this.order.patient;
     this.person = new Person(this.order.patient.person);
     this.searchIdentifiers = this.labOrdersSearchHelperService
@@ -165,6 +170,7 @@ export class LabOrderSearchPostComponent implements OnInit, OnChanges {
     if (!this.hasLoadingTimeRequiredInputs()) return;
 
     let payload = this.getPayload();
+    console.log(payload);
 
     let location = this.selectedLabLocation;
     this.isBusy = true;
@@ -191,7 +197,6 @@ export class LabOrderSearchPostComponent implements OnInit, OnChanges {
   getPayload() {
 
     let payload: any = null;
-
     if (this.orderType === null || this.orderType === undefined) {
       this.error = 'Unknown order type.';
       return null;
@@ -205,8 +210,7 @@ export class LabOrderSearchPostComponent implements OnInit, OnChanges {
     let order = this.order;
     let obs = order.encounter.obs;
     let locationUuid = order.encounter.location.uuid;
-    let patientIdentifier = this.searchIdentifiers.ampathMrsUId ?
-      this.searchIdentifiers.ampathMrsUId : this.searchIdentifiers.default;
+    let patientIdentifier = this.selectedIdentifier;
     let patientName = this.person.display;
     let dateReceived = this.dateReceived ? this.dateReceived : new Date();
     let gender = this.person.gender;
@@ -249,6 +253,11 @@ export class LabOrderSearchPostComponent implements OnInit, OnChanges {
       return false;
     }
 
+    if (_.isEmpty(this.selectedIdentifier)) {
+      this.error = 'Patient identifier is required.';
+      return false;
+    }
+
     let selectedSampleType = this.selectedSampleType + '';
     if (this.orderType.type === 'VL' && _.isEmpty(selectedSampleType)) {
       this.error = 'Sample type is required.';
@@ -276,6 +285,18 @@ export class LabOrderSearchPostComponent implements OnInit, OnChanges {
     }
 
     return true;
+  }
+
+  processPatientIdentifiers() {
+    let identifiers = [];
+    return new Promise((resolve, reject) => {
+      _.each(this.order.patient.identifiers, (identifier) => {
+        if (_.indexOf(identifier, '=')) {
+          identifiers.push((identifier.display.split('=')[1]).trim());
+        }
+      });
+      resolve(identifiers);
+    });
   }
 
   resetOrder() {
