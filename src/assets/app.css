@@ -238,7 +238,7 @@ md-tab-body.mat-tab-body-active, md-tab-body.md-tab-body-active {
   overflow: visible !important;
 }
 
-.mat-tab-header, .md-tab-header {
+form-renderer .mat-tab-header, form-renderer .md-tab-header {
   margin-right: 36px !important;
 }
 

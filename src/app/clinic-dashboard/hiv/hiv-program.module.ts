@@ -20,8 +20,6 @@ import {
  } from './patients-requiring-vl/patients-requiring-vl.component';
 import { DailyScheduleClinicFlowComponent
 } from './clinic-flow/daily-schedule-clinic-flow.component';
-import { HivCareComparativeComponent
-} from './hiv-visualization/hiv-care-overview.component';
 
 @NgModule({
     imports: [
@@ -43,9 +41,7 @@ import { HivCareComparativeComponent
         Moh731ReportComponent,
         HivSummaryIndicatorComponent,
         DailyScheduleClinicFlowComponent,
-        PatientsRequiringVLComponent,
-       // HivSummaryIndicatorsPatientListComponent,
-      HivCareComparativeComponent],
+        PatientsRequiringVLComponent],
     providers: [],
 })
 export class HivProgramModule { }

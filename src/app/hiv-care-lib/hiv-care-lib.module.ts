@@ -74,6 +74,9 @@ import {
 import {
   HivMonthlySummaryIndicatorsPatientListComponent
 } from './hiv-monthly-summary-indicators/patient-list.component';
+import { ClinicVisualizationContainerComponent
+} from './hiv-visualization/hiv-visualization-container';
+import { HivCareComparativeComponent } from './hiv-visualization/hiv-care-overview.component';
 
 @NgModule({
   imports: [
@@ -133,9 +136,11 @@ import {
     ClinicFlowLocationStatsComponent,
     ClinicFlowProviderStatsComponent,
     HivCareComparativeOverviewBaseComponent,
+    HivCareComparativeComponent,
     HivCareComparativeChartComponent,
     HivCareIndicatorDefComponent,
     HivCareTabularViewComponent,
+    ClinicVisualizationContainerComponent,
     VisualizationPatientListComponent,
     HivSummaryIndicatorsPatientListComponent,
     HivSummaryMonthlyTabularComponent,
@@ -159,9 +164,11 @@ import {
     ClinicFlowLocationStatsComponent,
     ClinicFlowProviderStatsComponent,
     HivCareComparativeOverviewBaseComponent,
+    HivCareComparativeComponent,
     HivCareComparativeChartComponent,
     HivCareIndicatorDefComponent,
     HivCareTabularViewComponent,
+    ClinicVisualizationContainerComponent,
     VisualizationPatientListComponent,
     HivSummaryIndicatorsPatientListComponent,
     HivMonthlySummaryIndicatorBaseComponent,

@@ -19,12 +19,12 @@ export class HivCareComparativeAnalyticsComponent extends HivCareComparativeOver
 implements OnInit {
   public data = [];
   public sectionsDef = [];
-
+  public enabledControls = 'datesControl';
   constructor(public visualizationResourceService: ClinicalSummaryVisualizationResourceService,
               private route: ActivatedRoute, private location: Location,
               private router: Router,
               public dataAnalyticsDashboardService: DataAnalyticsDashboardService) {
-    super(visualizationResourceService, dataAnalyticsDashboardService);
+    super(visualizationResourceService);
 
   }
 

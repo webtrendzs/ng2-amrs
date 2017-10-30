@@ -35,6 +35,7 @@ import { CacheModule } from 'ionic-cache';
 import { LocationFilterComponent
 } from './locations/location-filter/location-filter.component';
 import { EtlApi } from '../etl-api/etl-api.module';
+import { ReportFilterService } from '../hiv-care-lib/report-filters/report-filter.service';
 
 @NgModule({
   imports: [
@@ -80,7 +81,8 @@ import { EtlApi } from '../etl-api/etl-api.module';
     OnlineTrackerComponent,
     BuildVersionComponent, DateSelectorComponent, PdfViewerComponent, LocationFilterComponent
   ],
-  providers: [Ng2FilterPipe, StringToDatePipe, RoutesProviderService, HivSummaryService],
+  providers: [Ng2FilterPipe, StringToDatePipe, RoutesProviderService, HivSummaryService,
+    ReportFilterService],
 })
 export class NgamrsSharedModule {
 

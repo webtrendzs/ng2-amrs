@@ -14,7 +14,7 @@ import { Component, Input, OnInit } from '@angular/core';
       position: absolute;
       left:0;
       width: 100%;
-      height: 100%;
+      height: 30%;
       text-align: center;
       z-index: 9;
       box-sizing: border-box;

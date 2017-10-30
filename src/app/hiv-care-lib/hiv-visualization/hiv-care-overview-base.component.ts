@@ -1,17 +1,15 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 
 import * as Moment from 'moment';
+import { Subscription } from 'rxjs/Subscription';
+import * as _ from 'lodash';
 
 import { ClinicalSummaryVisualizationResourceService
 } from '../../etl-api/clinical-summary-visualization-resource.service';
-import * as _ from 'lodash';
-import {
-  DataAnalyticsDashboardService
-} from '../../data-analytics-dashboard/services/data-analytics-dashboard.services';
 
 @Component({
   selector: 'hiv-care-visualization-report-base',
-  template: 'hiv-care-overview-base.component.html',
+  template: './hiv-care-overview-base.component.html',
   styleUrls: ['hiv-care-overview-base.component.css'],
 })
 export class HivCareComparativeOverviewBaseComponent implements OnInit {
@@ -22,7 +20,8 @@ export class HivCareComparativeOverviewBaseComponent implements OnInit {
   public encounteredError: boolean = false;
   public errorMessage: string = '';
   public dates: any;
-  public enabledControls = 'datesControl, locationControl';
+  public enabledControls = 'datesControl';
+  public subscription: Subscription;
   public loadingHivCare: boolean = false;
   private _startDate: Date = Moment().subtract(1, 'year').toDate();
   public get startDate(): Date {
@@ -32,7 +31,6 @@ export class HivCareComparativeOverviewBaseComponent implements OnInit {
   public set startDate(v: Date) {
     this._startDate = v;
   }
-
   private _endDate: Date = new Date();
   public get endDate(): Date {
     return this._endDate;
@@ -51,8 +49,7 @@ export class HivCareComparativeOverviewBaseComponent implements OnInit {
     this._locationUuids = v;
   }
 
-  constructor(public visualizationResourceService: ClinicalSummaryVisualizationResourceService,
-              public dataAnalyticsDashboardService: DataAnalyticsDashboardService ) {
+  constructor(public visualizationResourceService: ClinicalSummaryVisualizationResourceService) {
   }
 
   public ngOnInit() {
@@ -69,7 +66,6 @@ export class HivCareComparativeOverviewBaseComponent implements OnInit {
     this.errorMessage = '';
     this.isLoadingReport = true;
     this.data = [];
-
     this.visualizationResourceService.getHivComparativeOverviewReport({
       endDate: this.toDateString(this.endDate),
       gender: 'M,F',
@@ -79,9 +75,7 @@ export class HivCareComparativeOverviewBaseComponent implements OnInit {
       order: 'encounter_datetime|asc',
       report: 'clinical-hiv-comparative-overview-report',
       startDate: this.toDateString(this.startDate)
-    }).subscribe(
-      (data) => {
-
+    }).subscribe((data) => {
         _.merge(_options,
           { data: data.result },
           { indicatorDefinitions: data.indicatorDefinitions });

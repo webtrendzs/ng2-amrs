@@ -15,8 +15,6 @@ import { HivCareLibModule } from '../../hiv-care-lib/hiv-care-lib.module';
 import { dataAnalyticsDashboardHivRouting } from './hiv-program.routes';
 import { NgamrsSharedModule } from '../../shared/ngamrs-shared.module';
 import { HivSummaryIndicatorsComponent } from './hiv-summary-indicators/hiv-summary-indicators';
-import { HivCareComparativeAnalyticsComponent
-} from './hiv-data-visualization/hiv-overview-visualization';
 import { DataAnalyticsDashboardService } from '../services/data-analytics-dashboard.services';
 import { HivClinicFlowResourceService } from '../../etl-api/hiv-clinic-flow-resource.service';
 import { ClinicFlowCacheService } from '../../hiv-care-lib/clinic-flow/clinic-flow-cache.service';
@@ -43,15 +41,13 @@ import {
   exports: [
     DataAnalyticsDashboardComponent,
     AdminDashboardClinicFlowComponent,
-    HivSummaryIndicatorsComponent,
-    HivCareComparativeAnalyticsComponent
+    HivSummaryIndicatorsComponent
   ],
   declarations: [
     DataAnalyticsDashboardComponent,
     AdminDashboardClinicFlowComponent,
     AdminDashboardClinicFlowComponent,
     HivSummaryIndicatorsComponent,
-    HivCareComparativeAnalyticsComponent,
     HivSummaryMonthlyIndicatorsComponent],
   providers: [
     DataAnalyticsDashboardService,

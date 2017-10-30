@@ -5,7 +5,7 @@
   "routeParameter": "",
   "nonProgramRoutes": [
     {
-      "url": "hiv/hiv-comparative-chart-analytics",
+      "url": "hiv/clinic-visualization",
       "label": "Clinical Visualization",
       "icon": "fa fa-line-chart"
     },

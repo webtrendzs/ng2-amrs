@@ -10,6 +10,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import {
   DataAnalyticsDashboardService
 } from '../../data-analytics-dashboard/services/data-analytics-dashboard.services';
+import { ReportFilterService } from './report-filter.service';
 declare var jQuery;
 require('ion-rangeslider');
 
@@ -66,7 +67,7 @@ export class ReportFiltersComponent implements OnInit, ControlValueAccessor, Aft
   private _indicators: Array<any> = [];
   private _gender: Array<any> = [];
   constructor(private indicatorResourceService: IndicatorResourceService,
-              private dataAnalyticsDashboardService: DataAnalyticsDashboardService,
+              private ReportFilterService: ReportFilterService,
               private elementRef: ElementRef) {
   }
   public get startDate(): Date {
@@ -157,8 +158,8 @@ export class ReportFiltersComponent implements OnInit, ControlValueAccessor, Aft
     }
   }
    public getCachedLocations() {
-    this.dataAnalyticsDashboardService.getSelectedLocations().subscribe(
-      (data)  => {
+    this.ReportFilterService.getSelectedLocations().subscribe(
+      (data: any)  => {
         if (data) {
           this.locations = data.locations;
         }
@@ -210,8 +211,8 @@ export class ReportFiltersComponent implements OnInit, ControlValueAccessor, Aft
   }
 
   public getSelectedLocations(locs: any) {
-      this.dataAnalyticsDashboardService.setSelectedLocations(locs);
-    }
+      this.ReportFilterService.setSelectedLocations(locs);
+  }
   public onGenderSelected(selectedGender) {
     this.selectedGender = selectedGender;
     this.onGenderChange.emit( this.selectedGender);

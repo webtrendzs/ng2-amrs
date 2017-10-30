@@ -1,32 +1,33 @@
-<h4 class="component-title" style="color: green;"><span class="fa fa-bar-chart"></span> Clinic Overview Visualization</h4>
-<div class="">
-  <div class="row">
-    <div class="col-sm-12">
-      <report-filters [(startDate)]="startDate" [(endDate)]="endDate" [enabledControls]="enabledControls"
-                      [parentIsBusy]="isLoadingReport"
-                      (generateReport)="generateReport()" [disableGenerateButton]="true">
-
-      </report-filters>
+<div class="row" *ngIf="locationUuids.length > 0">
+    <div class="loader" *ngIf="loadingHivCare">
+      <span><i class="fa fa-spinner fa-spin"></i>Loading...</span>
     </div>
-  </div>
-  <div class="row" *ngIf="locationUuids">
-    <div class="col-sm-12">
-      <div class="loader" *ngIf="loadingHivCare"><span><i class="fa fa-spinner fa-spin">
-      </i>Loading...</span></div>
-      <div *ngIf="hivComparativeChartOptions">
-        <hiv-care-overview-chart [options]="hivComparativeChartOptions" [dates] ="dates"></hiv-care-overview-chart>
-      </div>
-
+    <div *ngIf="hivComparativeChartOptions">
+      <hiv-care-overview-chart [options]="hivComparativeChartOptions"
+                               [dates]="dates"></hiv-care-overview-chart>
     </div>
-  </div>
+</div>
 
+<div *ngIf="locationUuids && locationUuids.length === 0" class="panel panel-info" style="margin:2px">
+  <div class="panel-heading">
+    <h5>
+      <strong class="text-info">
+					<span class="fa-stack fa-lg">
+							<i class="fa fa-circle-thin fa-stack-2x"></i>
+							<i class="fa fa-info fa-stack-1x"></i>
+					</span>
+        Please select at least one location to be able to generate a report
+      </strong>
+    </h5>
+  </div>
+</div>
 <div class="alert alert-danger fade in" *ngIf="encounteredError">
   <a href="#" class="close" data-dismiss="alert">&times;</a>
-  <h4><strong><span class="glyphicon glyphicon-warning-sign"></span> </strong> An error occurred while trying to load the report.
+  <h4><strong><span class="glyphicon glyphicon-warning-sign"></span> </strong> An error occurred
+    while trying to load the report.
     Please try again.
   </h4>
   <p>
     <small>{{errorMessage}}</small>
   </p>
-</div>
 </div>

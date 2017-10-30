@@ -8,9 +8,7 @@ import {
 import {
   ClinicalSummaryVisualizationService
 } from '../services/clinical-summary-visualization.service';
-import {
-  DataAnalyticsDashboardService
-} from '../../data-analytics-dashboard/services/data-analytics-dashboard.services';
+import { ReportFilterService } from '../report-filters/report-filter.service';
 
 @Component({
   selector: 'visualization-patient-list',
@@ -35,7 +33,7 @@ export class VisualizationPatientListComponent implements OnInit, OnDestroy {
               private router: Router,
               private visualizationResourceService: ClinicalSummaryVisualizationResourceService,
               private clinicalSummaryVisualizationService: ClinicalSummaryVisualizationService,
-              private dataAnalyticsDashboardService: DataAnalyticsDashboardService) {
+              private reportFilterService: ReportFilterService) {
     /**
      * Please note that this is a workaround for the dashboardService delay
      * to give you the location UUID.
@@ -76,8 +74,7 @@ export class VisualizationPatientListComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
   public getCachedLocations() {
-    this.dataAnalyticsDashboardService.getSelectedLocations().subscribe(
-      (data) => {
+    this.reportFilterService.getSelectedLocations().subscribe((data) => {
         if (data) {
           this.locationUuids = data.locations;
         }

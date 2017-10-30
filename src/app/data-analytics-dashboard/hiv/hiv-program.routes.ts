@@ -7,15 +7,11 @@ import {
 import {
   HivSummaryIndicatorsPatientListComponent
 } from '../../hiv-care-lib/hiv-summary-indicators/patient-list.component';
-import { HivCareComparativeComponent
-} from './hiv-visualization/hiv-care-overview.component';
 import {
   VisualizationPatientListComponent
 } from '../../hiv-care-lib/hiv-visualization/visualization-patient-list.component';
 import { AdminDashboardClinicFlowComponent
 } from './clinic-flow/admin-dashboard-clinic-flow';
-import { HivCareComparativeAnalyticsComponent
-} from './hiv-data-visualization/hiv-overview-visualization';
 import { HivSummaryIndicatorsComponent
 } from './hiv-summary-indicators/hiv-summary-indicators';
 import { DataAnalyticsDashboardComponent } from '../data-analytics.component';
@@ -26,6 +22,10 @@ import {
 import {
   HivMonthlySummaryIndicatorsPatientListComponent
 } from '../../hiv-care-lib/hiv-monthly-summary-indicators/patient-list.component';
+import { ClinicVisualizationContainerComponent
+} from '../../hiv-care-lib/hiv-visualization/hiv-visualization-container';
+import { HivCareComparativeComponent
+} from '../../hiv-care-lib/hiv-visualization/hiv-care-overview.component';
 
 const routes: Routes = [
   {
@@ -41,17 +41,42 @@ const routes: Routes = [
         ],
         children: [
           {
-            path: '', redirectTo: 'hiv-comparative-chart-analytics', pathMatch: 'full'
+            path: '', redirectTo: 'clinic-visualization', pathMatch: 'full'
           },
           {
             path: 'clinic-flow', component: AdminDashboardClinicFlowComponent
+          },
+          {
+            path: 'clinic-visualization',
+            children: [
+              {
+                path: '',
+                component: ClinicVisualizationContainerComponent,
+                children: [
+                  {
+                    path: 'patient-status'
+                  },
+                  {
+                    path: 'patients-in-care'
+                  },
+                  {
+                    path: 'hiv-care-comparative',
+                    component: HivCareComparativeComponent
+                  }
+                ]
+              },
+              {
+                path: 'patient-list/:report/:indicator/:period',
+                component: VisualizationPatientListComponent
+              }
+            ]
           },
           {
             path: 'hiv-comparative-chart-analytics',
             children: [
               {
                 path: '',
-                component: HivCareComparativeAnalyticsComponent
+                component: HivCareComparativeComponent
               },
               {
                 path: 'patient-list/:report/:indicator/:period',

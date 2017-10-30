@@ -6,12 +6,12 @@ import * as Moment from 'moment';
 @Injectable()
 export class DataAnalyticsDashboardService {
   public dataIsLoading: boolean = true;
+  public locations;
+  public selectedLocations = new BehaviorSubject(this.locations);
   private cached = {};
   private selectedFilters;
-  private locations;
-  private dataSubject = new ReplaySubject<any>(1);
+  private dataSubject = new BehaviorSubject(null);
   private reportFilters = new BehaviorSubject(this.selectedFilters);
-  private selectedLocations = new BehaviorSubject(this.locations);
   private isLoading = new BehaviorSubject(this.dataIsLoading);
   private currentTab = new Subject();
 
@@ -27,10 +27,10 @@ export class DataAnalyticsDashboardService {
   }
 
   public setSelectedLocations(locations: any) {
-    this.dataSubject.next(locations);
+    this.locations = locations;
   }
 
   public getSelectedLocations() {
-    return this.dataSubject;
+    return this.selectedLocations;
   }
 }

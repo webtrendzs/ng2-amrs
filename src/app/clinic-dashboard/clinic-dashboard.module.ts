@@ -21,7 +21,6 @@ import { ClinicDashboardComponent } from './clinic-dashboard.component';
 import { DailyScheduleComponent } from './daily-schedule/daily-schedule.component';
 import { ClinicDashboardGuard } from './clinic-dashboard.guard';
 import { MonthlyScheduleComponent } from './monthly-schedule/monthly-schedule.component';
-import { VisualizationComponent } from './clinical-summary-visualization/visualization-component';
 import { DailyScheduleVisitsComponent } from './daily-schedule/daily-schedule-visits.component';
 import { DailyScheduleAppointmentsComponent }
   from './daily-schedule/daily-schedule-appointments.component';
@@ -128,7 +127,6 @@ import {
     ClinicDashboardComponent,
     DailyScheduleComponent,
     MonthlyScheduleComponent,
-    VisualizationComponent,
     ClinicLabOrdersComponent,
     DailyScheduleAppointmentsComponent,
     DailyScheduleNotReturnedComponent,

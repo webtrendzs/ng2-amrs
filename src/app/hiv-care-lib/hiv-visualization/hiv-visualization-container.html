@@ -1,0 +1,26 @@
+<h4 class="component-title" style="color: green;"><span class="fa fa-bar-chart"></span> Clinic
+  Overview Visualization</h4>
+<div class="row">
+  <div class="col-sm-12">
+    <report-filters [(startDate)]="startDate" [(endDate)]="endDate"
+                    [enabledControls]="enabledControls"
+                    [parentIsBusy]="isLoadingReport"
+                    (generateReport)="updateRouteParamsAndGenerateReport()" [disableGenerateButton]="true">
+    </report-filters>
+    <div class="panel-body_">
+      <nav mat-tab-nav-bar>
+        <a mat-tab-link [routerLink]="'patient-status'"
+           routerLinkActive #rla="routerLinkActive"
+           [class.active]="rla.isActive">Patient Status</a>
+        <a mat-tab-link [routerLink]="'patients-in-care'"
+           routerLinkActive #rlb="routerLinkActive"
+           [class.active]="rlb.isActive">Patients in Care</a>
+        <a mat-tab-link [routerLink]="'hiv-care-comparative'"
+           routerLinkActive #rlc="routerLinkActive"
+           [class.active]="rlc.isActive">HIV Care Comparative
+        </a>
+      </nav>
+      <router-outlet (deactivate)="unsubscribeResource()"></router-outlet>
+    </div>
+  </div>
+</div>

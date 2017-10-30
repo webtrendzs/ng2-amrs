@@ -5,7 +5,6 @@ import { DailyScheduleComponent } from './daily-schedule/daily-schedule.componen
 import { ClinicDashboardComponent } from './clinic-dashboard.component';
 import { ClinicDashboardGuard } from './clinic-dashboard.guard';
 import { MonthlyScheduleComponent } from './monthly-schedule/monthly-schedule.component';
-import { VisualizationComponent } from './clinical-summary-visualization/visualization-component';
 import { ClinicLabOrdersComponent } from './clinic-lab-orders/clinic-lab-orders.component';
 import { DailyScheduleVisitsComponent } from './daily-schedule/daily-schedule-visits.component';
 import { DailyScheduleAppointmentsComponent }
@@ -13,8 +12,6 @@ import { DailyScheduleAppointmentsComponent }
 import { DailyScheduleNotReturnedComponent
 } from './daily-schedule/daily-schedule-not-returned.component';
 import { DefaulterListComponent } from './defaulter-list/defaulter-list.component';
-import { VisualizationPatientListComponent } from
-'./clinical-summary-visualization/visualization-patient-list/visualization.patient-list.component';
 import {
   ClinicFlowSummaryComponent
 } from '../hiv-care-lib/clinic-flow/clinic-flow-summary.component';

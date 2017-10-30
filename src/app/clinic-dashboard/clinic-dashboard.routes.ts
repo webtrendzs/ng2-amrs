@@ -2,7 +2,6 @@ import { ClinicDashboardComponent } from './clinic-dashboard.component';
 import { DailyScheduleComponent } from './daily-schedule/daily-schedule.component';
 import { ClinicDashboardGuard } from './clinic-dashboard.guard';
 import { MonthlyScheduleComponent } from './monthly-schedule/monthly-schedule.component';
-import { VisualizationComponent } from './clinical-summary-visualization/visualization-component';
 import { ClinicLabOrdersComponent } from './clinic-lab-orders/clinic-lab-orders.component';
 import { DailyScheduleVisitsComponent } from './daily-schedule/daily-schedule-visits.component';
 import { DailyScheduleAppointmentsComponent }
@@ -14,10 +13,7 @@ import {
   PatientStatusChangeVisualizationContainerComponent
 } from
   './patient-status-change-visualization/patient-status-change-visualization.container.component';
-import {
-  VisualizationPatientListComponent
-} from
-'./clinical-summary-visualization/visualization-patient-list/visualization.patient-list.component';
+
 import {
   PatientStatusChangeListComponent
 } from
@@ -73,19 +69,6 @@ export const routes = [
 
           },
           { path: 'monthly-schedule', component: MonthlyScheduleComponent },
-          {
-            path: 'visualization',
-            children: [
-              {
-                path: '',
-                component: VisualizationComponent
-              },
-              {
-                path: 'patient-list/:report/:indicator/:period',
-                component: VisualizationPatientListComponent
-              }
-            ]
-          },
           {
             path: 'patient-status-change-visualization',
             children: [
