@@ -3,8 +3,8 @@
   <h4 class="component-title">Patient Care Program Snapshots
   </h4>
   <div class="program">
-    <ng-container *ngFor="let row of availablePrograms; ">
-      <div class="enrolled" *ngIf="(row.isEnrolled)">
+    <ng-container *ngFor="let row of enrolledProgrames; ">
+      <div class="enrolled">
         <div class="program-header-wrapper">
           <h2 class="program-header pull-left">{{row.program.display}} (Enrolled on
             {{row.dateEnrolledView}})

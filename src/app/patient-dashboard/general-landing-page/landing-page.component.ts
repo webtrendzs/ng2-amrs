@@ -188,7 +188,8 @@ export class GeneralLandingPageComponent implements OnInit, OnDestroy {
         if (patient) {
           this.patient = patient;
           this.availablePrograms = patient.enrolledPrograms;
-          this.enrolledProgrames = patient.enrolledPrograms;
+          console.log(patient.enrolledPrograms);
+          this.enrolledProgrames = _.filter(patient.enrolledPrograms, 'isEnrolled');
         }
       }, (err) => {
         this.hasError = true;
