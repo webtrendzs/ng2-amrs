@@ -51,6 +51,7 @@ export class FormentryComponent implements OnInit, OnDestroy {
     orders: []
   };
   public diffCareReferralStatus: any = undefined;
+  public transferCareForm: string = null;
   private subscription: Subscription;
   private encounterUuid: string = null;
   private encounter: any = null;
@@ -93,7 +94,7 @@ export class FormentryComponent implements OnInit, OnDestroy {
     this.route.queryParams.subscribe((params) => {
       componentRef.visitUuid = params['visitUuid'];
       componentRef.encounterUuid = params['encounter'];
-
+      componentRef.transferCareForm = params['transferCareEncounter'];
       if (componentRef.draftedFormsService.lastDraftedForm !== null &&
         componentRef.draftedFormsService.lastDraftedForm !== undefined &&
         componentRef.draftedFormsService.loadDraftOnNextFormLoad) {
@@ -187,6 +188,11 @@ export class FormentryComponent implements OnInit, OnDestroy {
         this.preserveFormAsDraft = false;
         this.router.navigate(['/patient-dashboard/patient/' +
         this.patient.uuid + '/general/general/forms']);
+        break;
+      case 'transferCareformWizard':
+        this.preserveFormAsDraft = false;
+        this.router.navigate(['/patient-dashboard/patient/' +
+        this.patient.uuid + '/general/general/programs/forms-wizard']);
         break;
       case 'patientSearch':
         this.preserveFormAsDraft = false;
