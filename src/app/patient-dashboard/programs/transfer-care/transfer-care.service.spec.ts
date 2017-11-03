@@ -12,7 +12,7 @@ import { ProgramEnrollmentResourceService
 } from '../../../openmrs-api/program-enrollment-resource.service';
 import { ProgramResourceService } from '../../../openmrs-api/program-resource.service';
 
-fdescribe('Service: ProgramsTransferCareService', () => {
+describe('Service: ProgramsTransferCareService', () => {
   let service: ProgramsTransferCareService;
   let configs = {
     '781d8768-1359-11df-a1f1-0026b9348838': {

@@ -1,14 +1,14 @@
 import { TestBed, async, inject, fakeAsync, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { Http, BaseRequestOptions } from '@angular/http';
+import { Http, BaseRequestOptions, ResponseOptions } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Location } from '@angular/common';
 
 import { PatientService } from '../../services/patient.service';
-import { Patient } from '../../models/patient.model';
-import { ProgramEnrollment } from '../../models/program-enrollment.model';
+import { Patient } from '../../../models/patient.model';
+import { ProgramEnrollment } from '../../../models/program-enrollment.model';
 import { Program } from '../../models/program.model';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
@@ -24,6 +24,8 @@ import { PatientProgramService } from '../patient-programs.service';
 import { FormsResourceService } from '../../../openmrs-api/forms-resource.service';
 import { LocalStorageService } from '../../../utils/local-storage.service';
 import { FormOrderMetaDataService } from '../../common/forms/form-order-metadata.service';
+import { PatientProgramResourceService
+} from '../../../etl-api/patient-program-resource.service';
 
 class MockRouter {
   public navigate = jasmine.createSpy('navigate');
@@ -38,6 +40,7 @@ fdescribe('Component: ProgramsTransferCareFormWizardComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         ProgramsTransferCareService,
+        PatientProgramResourceService,
         PatientProgramService,
         FormsResourceService,
         LocalStorageService,
@@ -85,7 +88,71 @@ fdescribe('Component: ProgramsTransferCareFormWizardComponent', () => {
     expect(component).toBeDefined();
   });
 
-  it('should return NO forms when program is not in the configs', inject([], fakeAsync(() => {
+  it('should refetch patient encounters',
+    inject([ProgramsTransferCareService, PatientService, MockBackend],
+      fakeAsync((transferCareService, patientService, mockBackend) => {
+        let configs = {
+          '781d8768-1359-11df-a1f1-0026b9348838': {
+            transferCare: {
+              'AMPATH': ['cbe2d31d-2201-44ce-b52e-fbd5dc7cff33'],
+              'DISCHARGE': ['cbe2d31d-2201-44ce-b52e-fbd5dc7cff33'],
+              'NON-AMPATH': [
+                'cbe2d31d-2201-44ce-b52e-fbd5dc7cff33',
+                '8d5b2be0-c2cc-11de-8d13-0010c6dffd0f'
+              ]
+            }
+          },
+          'f7793d42-11ac-4cfd-9b35-e0a21a7a7c31': {
+            transferCare: {
+              'AMPATH': [
+                'cbe2d31d-2201-44ce-b52e-fbd5dc7cff33'
+              ],
+              'DISCHARGE': ['cbe2d31d-2201-44ce-b52e-fbd5dc7cff33'],
+              'NON-AMPATH': [
+                'cbe2d31d-2201-44ce-b52e-fbd5dc7cff33',
+                'f091b833-9e1a-4eef-8364-fc289095a832'
+              ]
+            }
+          },
+          '781d85b0-1359-11df-a1f1-0026b9348838': {
+            transferCare: {
+              'AMPATH': ['cbe2d31d-2201-44ce-b52e-fbd5dc7cff33'],
+              'DISCHARGE': ['00da8227-e7da-43c2-99b2-a4f237dd3924'],
+              'NON-AMPATH': ['cbe2d31d-2201-44ce-b52e-fbd5dc7cff33']
+            }
+          }
+        };
+        spyOn(component, 'ngOnInit').and.callThrough();
+        transferCareService.savePayload({transferType: 'AMPATH'});
+        let uuid: string = 'uuid';
+        let patientObject: Patient = new Patient({uuid: uuid, encounters: []});
 
-  })));
+        // setting currentlyLoadedPatient and currentlyLoadedPatientUuid for the first time
+        patientService.currentlyLoadedPatient.next(patientObject);
+        patientService.currentlyLoadedPatientUuid.next(uuid);
+        let encountersResponse = {
+          results: [
+            {
+              'uuid': '927d9d1f-44ce-471e-a77b-d1f1342f43f6',
+              'encounterDatetime': '2017-11-03T00:00:00.000+0300',
+              'location': {
+                'uuid': '08feb5b6-1352-11df-a1f1-0026b9348838',
+                'display': 'Amukura'
+              }
+            }]
+        };
+        let responses = [];
+        mockBackend.connections.subscribe((conn) => {
+          if (conn.request.url === 'https://amrsreporting.ampath.or.ke:8002' +
+            '/etl/program-visit-configs') {
+            responses.push(new Response(new ResponseOptions({body: JSON.stringify(configs)})));
+          } else {
+            expect(conn.request.url).toBe('12');
+          }
+          /*conn.mockRespond(new Response(
+            new ResponseOptions({body: JSON.stringify(encountersResponse)})));*/
+        });
+
+        component.ngOnInit();
+      })));
 });
