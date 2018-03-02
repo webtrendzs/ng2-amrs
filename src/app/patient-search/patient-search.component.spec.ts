@@ -43,6 +43,9 @@ import { CacheService } from 'ionic-cache';
 import { IonicStorageModule } from '@ionic/storage';
 import { SpyLocation } from '@angular/common/testing';
 import { Location } from '@angular/common';
+import { PatientProgramResourceService } from '../etl-api/patient-program-resource.service';
+import { ProgramsTransferCareService
+} from '../patient-dashboard/programs/transfer-care/transfer-care.service';
 
 
 class MockRouter {
@@ -122,6 +125,8 @@ describe('Component: PatientSearch', () => {
         LocalStorageService,
         CacheService,
         DataCacheService,
+        PatientProgramResourceService,
+        ProgramsTransferCareService,
         Location,
         {
           provide: Http,

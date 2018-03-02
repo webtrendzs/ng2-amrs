@@ -76,7 +76,7 @@ describe('Component: ProgramsTransferCareFormWizardComponent', () => {
         MockBackend,
         BaseRequestOptions,
       ],
-      declarations: [FormListComponent, ProgramsTransferCareFormWizardComponent],
+      declarations: [ProgramsTransferCareFormWizardComponent],
       imports: [FormsModule, RouterTestingModule, NgamrsSharedModule]
     });
   });

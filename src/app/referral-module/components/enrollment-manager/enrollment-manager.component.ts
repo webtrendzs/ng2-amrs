@@ -14,7 +14,7 @@ import { UserDefaultPropertiesService
 } from '../../../user-default-properties/user-default-properties.service';
 import { ProgramsTransferCareService
 } from '../../../patient-dashboard/programs/transfer-care/transfer-care.service';
-import {Subject} from "rxjs/Subject";
+import { Subject } from 'rxjs/Subject';
 
 @Component({
   selector: 'program-enrollment-manager',
@@ -36,6 +36,7 @@ export class EnrollmentManagerComponent implements OnInit, OnDestroy {
   public inputError: string;
   public newProgram: string;
   public availablePrograms: any[];
+  public availableProgramsOptions: any[];
   private location: any;
   private stateChangeRequiresModal: boolean = false;
   private program: any;
@@ -55,8 +56,7 @@ export class EnrollmentManagerComponent implements OnInit, OnDestroy {
 
   public ngOnInit() {
     this.showFormWizard = false;
-      this.patientReferralService.getProcessPayload().subscribe((stateChange) => {
-        console.log("starting.......stateChange.......", stateChange);
+    this.patientReferralService.getProcessPayload().subscribe((stateChange) => {
         if (stateChange) {
           this.state = stateChange;
           this.program = stateChange.program;
@@ -67,7 +67,7 @@ export class EnrollmentManagerComponent implements OnInit, OnDestroy {
           }
         }
       });
-      this.patientService.currentlyLoadedPatient.subscribe((patient) => {
+    this.patientService.currentlyLoadedPatient.subscribe((patient) => {
       if (patient !== null) {
         this.patient = patient;
       }
@@ -92,7 +92,7 @@ export class EnrollmentManagerComponent implements OnInit, OnDestroy {
   }
 
   public onProgramChange(event) {
-    this.newProgram = event;
+    this.newProgram = event.value;
   }
 
   public formsCompleted(event) {
@@ -209,15 +209,14 @@ export class EnrollmentManagerComponent implements OnInit, OnDestroy {
       this.program.enrolledProgram.location.uuid, targetState, this.program.enrolledProgram.uuid,
       this.location, this.program.dateEnrolled, this.program.programUuid)
       .subscribe((response: any) => {
-        console.log('response | location', response);
         if (_.isArray(response)) {
           this.newEnrollment = _.find(response,
-            (program) => _.isNull(program.dateCompleted));
+            (_program) => _.isNull(_program.dateCompleted));
         } else {
           this.newEnrollment = response;
         }
-      this._processComplete();
-      this.onReloadPrograms.next(true);
+        this._processComplete();
+        this.onReloadPrograms.next(true);
 
     });
   }
@@ -307,6 +306,19 @@ export class EnrollmentManagerComponent implements OnInit, OnDestroy {
         msg = 'Switch patient from ' + this.program.enrolledProgram.display +
           ' to another program. Proceed?';
         this.stateChangeRequiresModal = true;
+        this.availableProgramsOptions = _.map(this.patient.enrolledPrograms,
+          (availableProgram) => {
+          if (!availableProgram.isEnrolled) {
+            return {
+              label: availableProgram.program.display,
+              value: availableProgram.program.uuid
+            };
+          }
+          });
+        // sort alphabetically;
+        this.availableProgramsOptions = _.compact(_.orderBy(this.availableProgramsOptions,
+          ['label'], ['asc']));
+        this.newProgram = (_.first(this.availableProgramsOptions)).value;
         this._confirmWithMessage(msg);
         break;
       // refer in
@@ -357,6 +369,7 @@ export class EnrollmentManagerComponent implements OnInit, OnDestroy {
       acceptVisible: true,
       accept: () => {
         this._provideActionStep();
+        console.log('availableProgramsOptions', this.availableProgramsOptions);
       },
       reject: () => {
         this._cancelAction();

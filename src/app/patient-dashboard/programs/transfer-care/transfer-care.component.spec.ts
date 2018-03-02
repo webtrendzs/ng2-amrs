@@ -58,7 +58,7 @@ describe('Component: ProgramsTransferCareComponent', () => {
         MockBackend,
         BaseRequestOptions
       ],
-      declarations: [ProgramsContainerComponent, ProgramsTransferCareComponent],
+      declarations: [ProgramsTransferCareComponent],
       schemas: [ NO_ERRORS_SCHEMA ],
       imports: [FormsModule, NgamrsSharedModule, RouterTestingModule.withRoutes([]), MdTabsModule ]
     });
