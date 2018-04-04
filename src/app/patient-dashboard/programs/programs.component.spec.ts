@@ -124,7 +124,7 @@ describe('Component: ProgramsComponent', () => {
   it('should have required properties', (done) => {
 
     expect(component.enrolledProgrames.length).toBe(0);
-    expect(component.patients).toBeDefined();
+    expect(component.patient).toBeDefined();
     expect(component.loadingPatientPrograms).toBeDefined();
     expect(component.loadProgramsPatientIsEnrolledIn).toBeDefined();
     expect(component.subscribeToEnrollmentChangeEvent).toBeDefined();

@@ -52,6 +52,7 @@ import { ProgramEnrollmentComponent
 import { ProgramsComponent } from '../patient-dashboard/programs/programs.component';
 import { FormListComponent } from '../patient-dashboard/common/forms/form-list.component';
 import { ReportFiltersComponent } from './report-filters/report-filters.component';
+import { ZeroVlPipe } from './pipes/zero-vl-pipe';
 
 @NgModule({
   imports: [
@@ -94,14 +95,14 @@ import { ReportFiltersComponent } from './report-filters/report-filters.componen
   exports: [BusyModule, LaddaModule, DisplayErrorComponent,
     StringToDatePipe, Ng2FilterPipe, OnlineTrackerComponent, HivProgramSnapshotComponent,
     BuildVersionComponent, BusyComponent, UnenrollPatientProgramsComponent,
-    ProgramsContainerComponent, ProgramsComponent,
+    ProgramsContainerComponent, ProgramsComponent, ZeroVlPipe,
     ProgramEnrollmentComponent, FormListComponent, ReportFiltersComponent,
     DateSelectorComponent, PdfViewerComponent, NgxMyDatePickerModule, GeneralLandingPageComponent,
     OpenmrsApi, EtlApi, Ng2Bs3ModalModule, ModalModule, LocationFilterComponent, ToastComponent],
   declarations: [
     DisplayErrorComponent, StringToDatePipe, Ng2FilterPipe, HivProgramSnapshotComponent,
     GeneralLandingPageComponent, ProgramsComponent,
-    ProgramsContainerComponent, FormListComponent,
+    ProgramsContainerComponent, FormListComponent, ZeroVlPipe,
     ProgramEnrollmentComponent, ReportFiltersComponent,
     OnlineTrackerComponent, ToastComponent, BusyComponent, UnenrollPatientProgramsComponent,
     BuildVersionComponent, DateSelectorComponent, PdfViewerComponent, LocationFilterComponent
@@ -109,7 +110,8 @@ import { ReportFiltersComponent } from './report-filters/report-filters.componen
   entryComponents: [
     ToastComponent
   ],
-  providers: [Ng2FilterPipe, StringToDatePipe, RoutesProviderService, HivSummaryService],
+  providers: [Ng2FilterPipe, ZeroVlPipe, StringToDatePipe, RoutesProviderService,
+    HivSummaryService],
 })
 export class NgamrsSharedModule {
 
