@@ -88,8 +88,7 @@ describe('Component: LandingPageComponent', () => {
         }
 
       ],
-      declarations: [GeneralLandingPageComponent, HivProgramSnapshotComponent, BusyComponent,
-      UnenrollPatientProgramsComponent, ZeroVlPipe],
+      declarations: [ZeroVlPipe],
       imports: [PanelModule, CommonModule, FormsModule, CohortMemberModule,
         NgamrsSharedModule, OpenmrsApi, RouterModule, DialogModule]
     }).compileComponents().then(() => {
