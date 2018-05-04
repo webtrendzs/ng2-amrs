@@ -9,7 +9,7 @@ export class EncounterResourceService {
     'patient:(uuid,uuid),form:(uuid,name),' +
     'visit:(uuid,display,auditInfo,startDatetime,stopDatetime,location:(uuid,display)' +
             ',visitType:(uuid,name)),' +
-    'location:ref,encounterType:ref,encounterProviders)';
+    'location:ref,encounterType:ref,encounterProviders:(uuid,display,provider:(uuid,display)))';
 
     constructor(protected http: Http, protected appSettingsService: AppSettingsService) { }
     public getUrl(): string {
@@ -32,19 +32,19 @@ export class EncounterResourceService {
       }).map((response: Response) =>
         response.json()).flatMap((encounters: any) => {
 
-        if(encounters.results.length >= 500) {
+        if (encounters.results.length >= 500) {
           params.set('startIndex', '500');
           return this.http.get(url, {
             search: params
-          }).map((res: Response) =>{
+          }).map((res: Response) => {
 
-            return encounters.results.concat(res.json().results)
+            return encounters.results.concat(res.json().results);
 
-          })
+          });
 
         } else {
 
-          return Observable.of(encounters.results)
+          return Observable.of(encounters.results);
         }
 
       });
@@ -56,7 +56,8 @@ export class EncounterResourceService {
         let _customDefaultRep = 'custom:(uuid,encounterDatetime,' +
             'patient:(uuid,uuid,identifiers),form:(uuid,name),' +
             'visit:(uuid,visitType,display,startDatetime,stopDatetime),' +
-            'location:ref,encounterType:ref,encounterProviders,orders:full,' +
+            'location:ref,encounterType:ref,' +
+          'encounterProviders:(uuid,display,provider:(uuid,display)),orders:full,' +
             'obs:(uuid,obsDatetime,concept:(uuid,uuid,name:(display)),value:ref,groupMembers))';
         let params = new URLSearchParams();
         params.set('v', _customDefaultRep);
@@ -76,13 +77,14 @@ export class EncounterResourceService {
     }
 
     public saveEncounter(payload) {
-        if (!payload) {
+      console.log('payload', payload);
+      if (!payload) {
             return null;
         }
-        let url = this.getUrl() + 'encounter';
-        let headers = new Headers({ 'Content-Type': 'application/json' });
-        let options = new RequestOptions({ headers: headers });
-        return this.http.post(url, JSON.stringify(payload), options)
+      let url = this.getUrl() + 'encounter';
+      let headers = new Headers({ 'Content-Type': 'application/json' });
+      let options = new RequestOptions({ headers: headers });
+      return this.http.post(url, JSON.stringify(payload), options)
             .map((response: Response) => {
                 return response.json();
             });

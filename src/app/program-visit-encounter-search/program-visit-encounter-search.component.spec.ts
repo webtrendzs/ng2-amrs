@@ -21,6 +21,7 @@ import { DepartmentProgramsConfigService } from './../etl-api/department-program
 import { DataCacheService } from '../shared/services/data-cache.service';
 import { CacheService } from 'ionic-cache';
 import { IonicStorageModule } from '@ionic/storage';
+import { PatientService } from '../patient-dashboard/services/patient.service';
 
 class MockRouter {
  public navigate = jasmine.createSpy('navigate');
@@ -148,12 +149,12 @@ describe('Component: ProgramVisitEncounterSearch', () => {
           ProgramVisitEncounterSearchComponent
       ],
       providers: [
-        PatientProgramResourceService,
         AppSettingsService,
         LocalStorageService,
         DepartmentProgramsConfigService,
         DataCacheService,
         CacheService,
+        PatientService,
         Storage,
         {
           provide: Http,
@@ -170,6 +171,11 @@ describe('Component: ProgramVisitEncounterSearch', () => {
         {
           provide: AppFeatureAnalytics,
           useClass: FakeAppFeatureAnalytics
+        },
+        {
+          provide: PatientProgramResourceService,
+          useFactory: new FakePatientProgramResourceService(),
+          deps: []
         },
         MockBackend,
         BaseRequestOptions
@@ -214,4 +220,22 @@ describe('Component: ProgramVisitEncounterSearch', () => {
   });
 
 });
+
+export class FakePatientProgramResourceService {
+
+  constructor() {}
+
+  getAllProgramVisitConfigs() {
+    return Observable.of(programsSelected).delay(50);
+  }
+
+  getPatientProgramVisitConfigs(uuid) {
+    return Observable.of(programsSelected).delay(50);
+  }
+
+  getPatientProgramVisitTypes(patient: string, program: string,
+    enrollment: string, location: string) {
+    return Observable.of(visitTypes);
+  }
+}
 

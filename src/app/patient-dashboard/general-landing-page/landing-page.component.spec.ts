@@ -97,9 +97,8 @@ describe('Component: LandingPageComponent', () => {
         }
 
       ],
-      declarations: [GeneralLandingPageComponent, HivProgramSnapshotComponent, BusyComponent,
-      UnenrollPatientProgramsComponent, ZeroVlPipe],
-      imports: [PanelModule, NgSelectModule, CommonModule, FormsModule, CohortMemberModule,
+      declarations: [UnenrollPatientProgramsComponent],
+      imports: [PanelModule, CommonModule, FormsModule, CohortMemberModule,
         NgamrsSharedModule, OpenmrsApi, RouterModule, DialogModule]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(GeneralLandingPageComponent);
