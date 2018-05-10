@@ -1,10 +1,15 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+
+import * as moment from  'moment';
+
 import { UserDefaultPropertiesService } from
   '../../../../user-default-properties/index';
 import { PatientProgramResourceService } from
   '../../../../etl-api/patient-program-resource.service';
 import { VisitResourceService } from '../../../../openmrs-api/visit-resource.service';
 import { TodayVisitService } from '../today-visit.service';
+import { RetrospectiveDataEntryService
+} from '../../../../retrospective-data-entry/services/retrospective-data-entry.service';
 
 @Component({
   selector: 'app-visit-starter',
@@ -50,20 +55,20 @@ export class VisitStarterComponent implements OnInit {
     this._programEnrollmentUuid = v;
   }
 
-  private _selectedLocations: Array<string> = [];
-  public get selectedLocations(): Array<string> {
+  private _selectedLocations: Array<any> = [];
+  public get selectedLocations(): Array<any> {
     return this._selectedLocations;
   }
-  public set selectedLocations(v: Array<string>) {
+  public set selectedLocations(v: Array<any>) {
     this._selectedLocations = v;
     this.getCurrentProgramEnrollmentConfig();
   }
 
-  public get selectedLocation(): string {
-    return this._selectedLocations.length > 0 ? this._selectedLocations[0] : '';
+  public get selectedLocation(): any {
+    return this._selectedLocations.length > 0 ? this._selectedLocations[0] : {};
   }
-  public set selectedLocation(v: string) {
-    if (v !== this.selectedLocation) {
+  public set selectedLocation(v: any) {
+    if (this.selectedLocation.value && v.uuid !== this.selectedLocation.value) {
       this.selectedLocations = [v];
     }
   }
@@ -89,6 +94,7 @@ export class VisitStarterComponent implements OnInit {
   constructor(
     private userDefaultPropertiesService: UserDefaultPropertiesService,
     private patientProgramResourceService: PatientProgramResourceService,
+    private retrospectiveDataEntryService: RetrospectiveDataEntryService,
     private visitResourceService: VisitResourceService,
     private todayVisitService: TodayVisitService
   ) { }
@@ -100,8 +106,13 @@ export class VisitStarterComponent implements OnInit {
 
   public setUserDefaultLocation() {
     let location: any = this.userDefaultPropertiesService.getCurrentUserDefaultLocationObject();
+    let retroSettings = this.retrospectiveDataEntryService.retroSettings.value;
     if (location && location.uuid) {
-      this._selectedLocations.push(location.uuid);
+      if (retroSettings && retroSettings.enabled) {
+        this._selectedLocations.push(retroSettings.location);
+      } else {
+        this._selectedLocations.push({value: location.uuid, label: location.display});
+      }
     }
   }
 
@@ -114,7 +125,7 @@ export class VisitStarterComponent implements OnInit {
     this.error = '';
     this.patientProgramResourceService
       .getPatientProgramVisitTypes(this.patientUuid,
-      this.programUuid, this.programEnrollmentUuid, this.selectedLocation)
+      this.programUuid, this.programEnrollmentUuid, this.selectedLocation.value)
       .subscribe(
       (progConfig) => {
         this.isBusy = false;
@@ -128,15 +139,27 @@ export class VisitStarterComponent implements OnInit {
   }
 
   public startVisit(visitTypeUuid) {
+    let retroSettings = this.retrospectiveDataEntryService.retroSettings.value;
     this.startedVisit = true;
     this.isBusy = true;
     this.error = '';
     let payload = {
       patient: this.patientUuid,
-      location: this.selectedLocation,
+      location: this.selectedLocation.value,
       startDatetime: new Date(),
       visitType: visitTypeUuid
     };
+
+    if (retroSettings && retroSettings.enabled) {
+      payload.location = retroSettings.location.value;
+      payload.startDatetime = this.setRetroDateTime(retroSettings.visitDate);
+      /*payload['attributes'] = [
+        {
+          attributeType: '271d8a8d-e18a-43a8-8ad5-7a3cf7b926c3',
+          value: retroSettings.provider.label
+        }
+      ]*/
+    }
 
     this.visitResourceService.saveVisit(payload).subscribe(
       (savedVisit) => {
@@ -161,6 +184,12 @@ export class VisitStarterComponent implements OnInit {
 
   public onLocationChanged(locations) {
     this.selectedLocation = locations.locations;
+  }
+
+  public setRetroDateTime(date) {
+    let time = moment().format('hh:mm:ss A');
+    let _date = date.split(',')[0];
+    return new Date(_date + ', ' + time);
   }
 
 }

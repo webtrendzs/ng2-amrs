@@ -97,7 +97,7 @@ describe('Component: LandingPageComponent', () => {
         }
 
       ],
-      declarations: [GeneralLandingPageComponent, HivProgramSnapshotComponent, BusyComponent,
+      declarations: [GeneralLandingPageComponent, HivProgramSnapshotComponent,
       UnenrollPatientProgramsComponent, ZeroVlPipe],
       imports: [PanelModule, NgSelectModule, CommonModule, FormsModule, CohortMemberModule,
         NgamrsSharedModule, OpenmrsApi, RouterModule, DialogModule]

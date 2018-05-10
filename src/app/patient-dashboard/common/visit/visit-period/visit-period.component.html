@@ -5,10 +5,12 @@
        Ended at: <strong>{{stopDatetime | date: 'hh:mm:ss a MMM, dd yyyy'}}</strong>
        </span>
       <span>At: <strong>{{locationName}}</strong></span>
-
+      <span *ngIf="retroProviderAttribute">
+       By: <strong>{{retroProviderAttribute.label}}</strong>
+       </span>
       <div *ngIf="editLocation">
         <label> Select location:</label>
-        <ng-select (selected)="loadedLocation($event)" [(ngModel)]="locationUuid" [options]="locations">
+        <ng-select (change)="loadedLocation($event)" [(ngModel)]="locationUuid" [items]="locations">
         </ng-select>
 
         <button class="btn app-btn">

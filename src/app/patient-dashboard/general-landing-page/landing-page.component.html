@@ -91,7 +91,7 @@
     </div>
     <div class="program-body">
       <h3><em class="text-danger" *ngIf="hasValidationErrors">{{currentError}}</em></h3>
-      <div class="container-fluid">
+      <div class="program-container-fluid">
         <div class="row">
           <div class="cell col-sm-12 col-xs-12 col-md-12" style="margin-bottom: 30px;">
             <label>Department</label>
@@ -104,10 +104,10 @@
         <div class="row" style="padding:4px" *ngIf="department">
           <div style="margin-bottom: 12px;" class="col-md-4 cell">
             <label for="program">Select Program</label>
-            <ng-select [multiple]="false" id="program"
+            <ng-select class="sharp-corners" [multiple]="false" id="program"
                        [items]="availableDepartmentPrograms"
                        [placeholder]="'Select a program...'"
-                       (add)="onProgramChange($event)"
+                       (change)="onProgramChange($event)"
                        [(ngModel)]="program">
             </ng-select>
           </div>

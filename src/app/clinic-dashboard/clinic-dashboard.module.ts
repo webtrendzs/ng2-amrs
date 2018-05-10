@@ -8,7 +8,6 @@ import { CalendarModule } from 'angular-calendar';
 import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 import { MdTabsModule, MdSlideToggleModule } from '@angular/material';
 import { NgamrsSharedModule } from '../shared/ngamrs-shared.module';
-import { SelectModule } from 'angular2-select';
 import { OpenmrsApi } from '../openmrs-api/openmrs-api.module';
 import { ClinicDashboardCacheService } from './services/clinic-dashboard-cache.service';
 import {
@@ -167,7 +166,6 @@ import {
     FormsModule,
     OpenmrsApi,
     EtlApi,
-    SelectModule,
     Angulartics2Module.forChild(),
     NgamrsSharedModule,
     ChartModule,
@@ -185,7 +183,6 @@ import {
     HivProgramModule,
     OpenmrsApi,
     EtlApi,
-    SelectModule,
     Angulartics2Module.forChild(),
     NgamrsSharedModule,
     CalendarModule.forRoot(),

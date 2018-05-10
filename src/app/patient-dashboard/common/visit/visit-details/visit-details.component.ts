@@ -16,14 +16,15 @@ import { Encounter } from '../../../../models/encounter.model';
 export class VisitDetailsComponent implements OnInit {
   public completedEncounterTypesUuids = [];
   public allowedEncounterTypesUuids = [];
-  public isBusy = false;
+  public isBusy: boolean = false;
   public error = '';
-  public showDeleteEncountersButton = false;
-  public showConfirmationDialog = false;
-  public confirmingCancelVisit = false;
-  public confirmingEndVisit = false;
-  public editingLocation = false;
-  public editingVisitType = false;
+  public showDeleteEncountersButton: boolean = false;
+  public showConfirmationDialog: boolean = false;
+  public confirmingCancelVisit: boolean = false;
+  public confirmingEndVisit: boolean = false;
+  public editingLocation: boolean = false;
+  public editingProvider: boolean = false;
+  public editingVisitType: boolean = false;
   public message: any = {
     'title': '',
     'message': ''
@@ -133,7 +134,7 @@ export class VisitDetailsComponent implements OnInit {
         'form:(uuid,name),location:ref,' +
         'encounterType:ref,provider:ref),patient:(uuid,uuid),' +
         'visitType:(uuid,name),location:ref,startDatetime,' +
-        'stopDatetime)';
+        'stopDatetime,attributes:(uuid,value))';
       this.visitResourceService.getVisitByUuid(visitUuid,
         { v: custom })
         .subscribe((visit) => {
@@ -227,6 +228,10 @@ export class VisitDetailsComponent implements OnInit {
     this.editingVisitType = !this.editingVisitType;
   }
 
+  public toggleEditVisitProvider() {
+    this.editingProvider = !this.editingProvider;
+  }
+
   public confirmAction(action) {
     switch (action) {
       case 'cancel-visit':
@@ -261,6 +266,12 @@ export class VisitDetailsComponent implements OnInit {
 
   public onVisitLocationEditted(location) {
     this.toggleEditLocation();
+    this.reloadVisit();
+    this.visitChanged.next(this.visit);
+  }
+
+  public onVisitProviderChanged(updatedVisit) {
+    this.editingProvider = false;
     this.reloadVisit();
     this.visitChanged.next(this.visit);
   }

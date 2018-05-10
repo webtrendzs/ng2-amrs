@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { Response } from '@angular/http';
 import { Router, ActivatedRoute, Params }    from '@angular/router';
 
-import { UserService } from '../openmrs-api/user.service';
-import { User } from '../models/user.model';
+import * as _ from 'lodash';
+
 import { UserDefaultPropertiesService } from './user-default-properties.service';
+import { RetrospectiveDataEntryService
+} from '../retrospective-data-entry/services/retrospective-data-entry.service';
 
 @Component({
   selector: 'user-default-properties',
@@ -14,70 +16,85 @@ import { UserDefaultPropertiesService } from './user-default-properties.service'
 export class UserDefaultPropertiesComponent implements OnInit {
 
   public isBusy: boolean = false;
-  public query: string = '';
-  public user: User;
-  public locations: Array<any> = [];
-  public filteredList: Array<any> = [];
-  public currentLocation: string = '';
-  public selectedIdx: number = -1;
+  public location: any;
+  public confirming: boolean = false;
   public isLoading: boolean = false;
+  public locations: Array<any> = [];
+  public currentLocation: any;
+  private retroSettings: any;
 
   constructor(private router: Router,
               private route: ActivatedRoute,
-              private propertyLocationService: UserDefaultPropertiesService,
-              private userService: UserService
+              private retrospectiveDataEntryService: RetrospectiveDataEntryService,
+              private propertyLocationService: UserDefaultPropertiesService
   ) {
-    this.user = this.userService.getLoggedInUser();
 
   }
 
   public ngOnInit() {
 
     this.isBusy = true;
-
-    this.currentLocation = this.propertyLocationService.getCurrentUserDefaultLocation();
+    this.currentLocation = this.propertyLocationService.getCurrentUserDefaultLocationObject();
     // if the user is confirming, prefill the current location
     this.route.params.subscribe((params: Params) => {
-        if (params['confirm'] !== undefined) {
-          this.query = this.currentLocation;
-        }
+      if (params['confirm'] !== undefined) {
+        this.location = this.retrospectiveDataEntryService.mappedLocation(this.currentLocation);
+        this.propertyLocationService.setUserProperty('retroLocation',
+          JSON.stringify(this.location));
+      }
     });
 
     this.propertyLocationService.getLocations().subscribe((response: Response) => {
-      this.locations = response.json().results;
+      this.locations = response.json().results.map((location: any) => {
+        if (!_.isNil(location.display)) {
+          return this.retrospectiveDataEntryService.mappedLocation(location);
+        }
+      });
       this.isBusy = false;
+    });
+
+    this.retrospectiveDataEntryService.retroSettings.subscribe((retroSettings) => {
+          this.retroSettings = retroSettings;
     });
 
   }
 
   public goToPatientSearch() {
-    this.isLoading = true;
-    this.router.navigate(['patient-dashboard/patient-search']);
+    if (this.retroSettings && this.retroSettings.enabled) {
+      this.validateSettings();
+    } else {
+      this.isLoading = true;
+      this.router.navigate(['patient-dashboard/patient-search']);
+    }
+
   }
 
-  public filter(event: any) {
-
-    if (this.query !== '') {
-      this.filteredList = this.locations.filter(function(_location) {
-        return _location.display.toLowerCase().indexOf(this.query.toLowerCase()) > -1;
-      }.bind(this));
-      if (event.code === 'ArrowDown' && this.selectedIdx < this.filteredList.length) {
-        this.selectedIdx++;
-      } else if (event.code === 'ArrowUp' && this.selectedIdx > 0) {
-        this.selectedIdx--;
-      }
+  public validateSettings() {
+    let error = {};
+    if (_.isNil(this.retroSettings.provider)) {
+      error['provider'] = true;
+    }
+    if (_.isNil(this.retroSettings.visitDate)) {
+      error['visitDate'] = true;
+    }
+    if (!_.isEmpty(error)) {
+      this.updateErrorState(error);
     } else {
-      this.filteredList = [];
+      this.isLoading = true;
+      this.router.navigate(['patient-dashboard/patient-search']);
     }
   }
 
  public select(item) {
-    this.query = item.display;
-    this.currentLocation = item.display;
-    let location = JSON.stringify({ uuid: item.uuid, display: item.display });
+    console.log('wait, does it hit here?');
+    let location = JSON.stringify({ uuid: item.value, display: item.label });
     this.propertyLocationService.setUserProperty('userDefaultLocation', location);
-    this.filteredList = [];
-    this.selectedIdx = -1;
+    this.propertyLocationService.setUserProperty('retroLocation', JSON.stringify(item));
+  }
+
+  public updateErrorState(error) {
+    this.retrospectiveDataEntryService.updateProperty('errorState',
+      JSON.stringify(error));
   }
 
 }

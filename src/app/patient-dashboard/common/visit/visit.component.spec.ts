@@ -34,9 +34,12 @@ import { PatientProgramResourceService } from '../../../etl-api/patient-program-
 import { VisitResourceService } from '../../../openmrs-api/visit-resource.service';
 import { DialogModule } from 'primeng/primeng';
 import { FormsModule } from '@angular/forms';
-import { SelectModule } from 'angular2-select';
 import { LocationResourceService } from '../../../openmrs-api/location-resource.service';
 import { TodayVisitService, VisitsEvent } from './today-visit.service';
+import { RetrospectiveDataEntryService
+} from '../../../retrospective-data-entry/services/retrospective-data-entry.service';
+import { FakeRetrospectiveDataEntryService
+} from '../../../retrospective-data-entry/services/retrospective-data-entry-mock.service';
 
 class LocationServiceMock {
   constructor() {
@@ -98,6 +101,11 @@ describe('Component: Visit', () => {
             return new FakeDefaultUserPropertiesFactory();
           }
         },
+        {
+          provide: RetrospectiveDataEntryService, useFactory: () => {
+          return new FakeRetrospectiveDataEntryService();
+        }
+        },
         ProgramEnrollmentResourceService,
         {
           provide: UserDefaultPropertiesService, useFactory: () => {
@@ -130,7 +138,6 @@ describe('Component: Visit', () => {
         UserDefaultPropertiesModule,
         DialogModule,
         FormsModule,
-        SelectModule,
         NgamrsSharedModule,
         PatientDashboardModule,
         HttpModule,

@@ -8,7 +8,6 @@ import {
   MdProgressSpinnerModule, MdProgressBarModule, MdTabsModule, MdSnackBarModule
 } from '@angular/material';
 import { CacheService } from 'ionic-cache';
-import { SelectModule } from 'angular2-select';
 import { Ng2Bs3ModalModule } from 'ng2-bs3-modal/ng2-bs3-modal';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { ToastComponent } from '../patient-dashboard/common/formentry/form-updater-toast.component';
@@ -36,6 +35,8 @@ import { CacheModule } from 'ionic-cache';
 import { LocationFilterComponent
 } from './locations/location-filter/location-filter.component';
 import { EtlApi } from '../etl-api/etl-api.module';
+import { RetrospectiveDataEntryModule
+} from '../retrospective-data-entry/retrospective-data-entry.module';
 
 @NgModule({
   imports: [
@@ -47,7 +48,7 @@ import { EtlApi } from '../etl-api/etl-api.module';
         minDuration: 600,
         wrapperClass: 'my-class',
         template: `
-                      <div class="loader" ><span><i class="fa fa-spinner fa-spin">
+                      <div class='loader' ><span><i class='fa fa-spinner fa-spin'>
       </i>{{message}}</span></div>`,
       }
     ),
@@ -71,11 +72,12 @@ import { EtlApi } from '../etl-api/etl-api.module';
     CacheModule,
     // SelectModule,
     NgSelectModule,
+    RetrospectiveDataEntryModule,
     MdSnackBarModule
   ],
   exports: [BusyModule, LaddaModule, DisplayErrorComponent,
     StringToDatePipe, Ng2FilterPipe, OnlineTrackerComponent,
-    BuildVersionComponent,
+    BuildVersionComponent, RetrospectiveDataEntryModule,
     DateSelectorComponent, PdfViewerComponent, NgxMyDatePickerModule,
     OpenmrsApi, EtlApi, Ng2Bs3ModalModule, ModalModule, LocationFilterComponent, ToastComponent],
   declarations: [

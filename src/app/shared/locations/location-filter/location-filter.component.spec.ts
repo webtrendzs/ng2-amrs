@@ -1,5 +1,4 @@
 import { FormsModule } from '@angular/forms';
-import { SelectModule } from 'angular2-select';
 import { MockBackend } from '@angular/http/testing';
 import { BaseRequestOptions, Http } from '@angular/http';
 
@@ -169,13 +168,15 @@ describe('Component: Location Filter Component', () => {
     expect(component.selectedCounty).toEqual('Uasin Gishu');
   }));
 
-  it('should set county when a coma separated string of locations is given', fakeAsync(() => {
+  // this test is irrelevant at the moment. Filter has changed on how it works
+
+  /*it('should set county when a coma separated string of locations is given', fakeAsync(() => {
     component.locationUuids = '123,456';
     component.ngOnInit();
     tick();
     fixture.detectChanges();
     expect(component.selectedCounty).toEqual('Uasin Gishu');
-  }));
+  }));*/
 
   it('should NOT set county when locations from different counties are given', fakeAsync(() => {
     // 123 = Uasin Gishu && 789 = Nandi

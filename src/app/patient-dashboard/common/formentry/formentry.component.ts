@@ -35,6 +35,8 @@ import { ProgramsTransferCareService } from '../../programs/transfer-care/transf
 import { Encounter } from '../../../models/encounter.model';
 
 import { EncounterType } from '../../../models/encounter-type.model';
+import { RetrospectiveDataEntryService
+} from '../../../retrospective-data-entry/services/retrospective-data-entry.service';
 
 @Component({
   selector: 'app-formentry',
@@ -92,7 +94,8 @@ export class FormentryComponent implements OnInit, OnDestroy {
     private formentryHelperService: FormentryHelperService,
     private patientReminderService: PatientReminderService,
     private transferCareService: ProgramsTransferCareService,
-    private confirmationService: ConfirmationService) {
+    private confirmationService: ConfirmationService,
+    private retrospectiveDataEntryService: RetrospectiveDataEntryService) {
   }
 
   public ngOnInit() {
@@ -115,7 +118,7 @@ export class FormentryComponent implements OnInit, OnDestroy {
       } else if (componentRef.draftedFormsService.lastDraftedForm !== null &&
         componentRef.draftedFormsService.lastDraftedForm !== undefined &&
         !componentRef.draftedFormsService.loadDraftOnNextFormLoad) {
-        setTimeout(()=> {
+        setTimeout(() => {
           this.confirmationService.confirm({
             header: 'Unsaved Draft Form',
             message: 'You have unsaved changes on your last form ' +
@@ -243,9 +246,19 @@ export class FormentryComponent implements OnInit, OnDestroy {
 
   public loadDefaultValues(): void {
 
+    let retroSettings = this.retrospectiveDataEntryService.retroSettings.value;
+
     let location = this.userDefaultPropertiesService.getCurrentUserDefaultLocationObject();
     let currentUser = this.userService.getLoggedInUser();
     let currentDate = moment().format();
+
+    if (retroSettings && retroSettings.enabled) {
+      location = {
+        uuid: retroSettings.location.value,
+        display: retroSettings.location.label
+      };
+      currentDate = moment(this.setRetroDateTime(retroSettings.visitDate)).format();
+    }
 
     let encounterDate = this.form.searchNodeByQuestionId('encDate');
     if (encounterDate.length > 0) {
@@ -261,9 +274,19 @@ export class FormentryComponent implements OnInit, OnDestroy {
     if (encounterProvider.length > 0 &&
       this.compiledSchemaWithEncounter &&
     this.compiledSchemaWithEncounter.provider !== {}) {
-      encounterProvider[0].control.setValue(this.compiledSchemaWithEncounter.provider.uuid);
+      let provider = this.compiledSchemaWithEncounter.provider.uuid;
+      if (retroSettings && retroSettings.enabled) {
+        provider = retroSettings.provider.value;
+      }
+      encounterProvider[0].control.setValue(provider);
     }
 
+  }
+
+  private setRetroDateTime(date) {
+    let time = moment().format('hh:mm:ss A');
+    let _date = date.split(',')[0];
+    return new Date(_date + ', ' + time);
   }
 
   private loadDraftedForm() {

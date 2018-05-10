@@ -1,7 +1,7 @@
 <div *ngIf="isEditVisitType" class="edit-visits">
   <label for="visitType">Select Visit Type:</label>
   <div class="visit-type-select">
-    <ng-select name="visitType" (selected)="loadedLocation($event)" [(ngModel)]="visitType" [options]="visitTypes">
+    <ng-select name="visitType" id="visitType" (change)="onVisitTypeChanged($event)" [(ngModel)]="visitType" [items]="visitTypes">
     </ng-select>
 
   </div>

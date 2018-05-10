@@ -34,6 +34,11 @@ landing-page {
   color: inherit;
 }
 
+.program-container-fluid {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
 .program .program-body {
   padding-top:12px;
   padding-bottom:12px;
@@ -245,13 +250,13 @@ h3 {
   -webkit-transition: all 0.2s linear;
 }
 
-a.btn {
+landing-page a.btn {
   color: #fff !important;
   display: inline-block;
   margin-right: 7px;
 }
 
-a.btn.btn-info {
+landing-page a.btn.btn-info {
   margin-bottom: 0;
 }
 

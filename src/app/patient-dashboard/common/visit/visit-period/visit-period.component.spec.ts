@@ -26,7 +26,6 @@ import {
   RouterModule, ChildrenOutletContexts,
 } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { SelectModule } from 'angular2-select';
 import { CacheService } from 'ionic-cache';
 import { DataCacheService } from '../../../../shared/services/data-cache.service';
 import { BusyModule, BusyConfig } from 'angular2-busy';
@@ -35,6 +34,10 @@ import { RoutesProviderService
 } from '../../../../shared/dynamic-route/route-config-provider.service';
 import { ProgramService } from '../../../programs/program.service';
 import { ProgramResourceService } from '../../../../openmrs-api/program-resource.service';
+import { RetrospectiveDataEntryModule
+} from '../../../../retrospective-data-entry/retrospective-data-entry.module';
+import {UserService} from "../../../../openmrs-api/user.service";
+import {User} from "../../../../models/user.model";
 class MockActivatedRoute {
   public params: any = {};
   public queryParams = Observable.of(this.params);
@@ -57,6 +60,14 @@ class LocationServiceMock {
       countyDistrict: 'district 2',
       stateProvince: 'county 2'
     }]);
+  }
+}
+
+class UserServiceMock {
+  constructor() {
+  }
+  public getLoggedInUser(): User {
+    return new User({});
   }
 }
 
@@ -88,10 +99,15 @@ describe('Component: Visit Period Component Unit Tests', () => {
         LocationResourceService,
         LocalStorageService,
         CacheService,
+        UserService,
         DataCacheService,
         {
           provide: ActivatedRoute,
           useClass: MockActivatedRoute
+        },
+        {
+          provide: UserService,
+          useClass: UserServiceMock
         },
         {
           provide: Router,
@@ -124,7 +140,7 @@ describe('Component: Visit Period Component Unit Tests', () => {
       declarations: [
         VisitPeriodComponent
       ],
-      imports: [FormsModule, SelectModule, BusyModule]
+      imports: [FormsModule, BusyModule, RetrospectiveDataEntryModule]
     });
   });
 
@@ -165,7 +181,7 @@ describe('Component: Visit Period Component Unit Tests', () => {
       expect(component.encounterVisitUuid).toEqual('visit-uuid');
       expect(component.startDatetime).toEqual('2017-01-20T16:29:45.000+0300');
       expect(component.stopDatetime).toEqual('2017-01-20T16:30:45.000+0300');
-      expect(component.locationUuid).toEqual('uuid');
+      expect(component.locationUuid).toEqual({ value: 'uuid', label: 'display'});
 
       activatedRoute.params['visitUuid'] = null;
       component.subscribeToRouteChangeEvent();
@@ -252,7 +268,7 @@ describe('Component: Visit Period Component Unit Tests', () => {
       expect(component.startDatetime).toEqual('');
       expect(component.stopDatetime).toEqual('');
       expect(component.currentVisit).toEqual('');
-      expect(component.locationUuid).toEqual('');
+      expect(component.locationUuid).toBeFalsy(undefined);
     }));
 
   it('should load a list of encounter locations',

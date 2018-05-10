@@ -107,7 +107,6 @@ import { DateTimePickerModule } from 'ng2-openmrs-formentry/dist/components/date
 import { VisitPeriodComponent } from './visit/visit-period/visit-period.component';
 import { LocatorMapComponent } from './locator-map/locator-map.component';
 import { SecurePipe } from './locator-map/secure.pipe';
-import { SelectModule } from 'angular2-select';
 import { CohortMemberModule } from '../../patient-list-cohort/cohort-member/cohort-member.module';
 import { EditHealtCenterComponent } from './patient-info/edit-healthcenter.component';
 import {
@@ -127,7 +126,6 @@ import { HivCareLibModule } from '../../hiv-care-lib/hiv-care-lib.module';
 import { LabOrderSearchModule } from '../../lab-order-search/lab-order-search.module';
 import { PatientSearchModule } from '../../patient-search/patient-search.module';
 import { PatientProgramService } from '../programs/patient-programs.service';
-import { BusyComponent } from '../../shared/busy-loader/busy.component';
 import { FormentryReferralsHandlerService } from './formentry/formentry-referrals-handler.service';
 import { PatientReferralsModule } from './patient-referrals/patient-referrals.module';
 import { VisitDetailsComponent } from './visit/visit-details/visit-details.component';
@@ -175,7 +173,6 @@ import { HttpClient } from '../../shared/services/http-client.service';
     EtlApi,
     ButtonModule,
     DateTimePickerModule,
-    SelectModule,
     AgGridModule.withComponents([
 
     ]),
@@ -189,7 +186,6 @@ import { HttpClient } from '../../shared/services/http-client.service';
   ],
   exports: [
     PatientInfoComponent,
-    BusyComponent,
     PatientEncountersComponent,
     PatientEncounterObservationsComponent,
     PatientVitalsComponent,
@@ -241,7 +237,6 @@ import { HttpClient } from '../../shared/services/http-client.service';
   declarations: [
     VisitSummaryComponent,
     PatientInfoComponent,
-    BusyComponent,
     PatientEncountersComponent,
     PatientEncounterObservationsComponent,
     PatientVitalsComponent,

@@ -65,9 +65,15 @@ import { ProgramResourceService } from '../../../openmrs-api/program-resource.se
 import { FormentryReferralsHandlerService } from './formentry-referrals-handler.service';
 import { PatientReferralsModule } from '../patient-referrals/patient-referrals.module';
 import { ProgramsTransferCareService } from '../../programs/transfer-care/transfer-care.service';
-import {PatientProgramResourceService} from "../../../etl-api/patient-program-resource.service";
+import {PatientProgramResourceService} from '../../../etl-api/patient-program-resource.service';
 import { VisitResourceService } from '../../../openmrs-api/visit-resource.service';
 import { HivSummaryResourceService } from '../../../etl-api/hiv-summary-resource.service';
+import { RetrospectiveDataEntryModule
+} from '../../../retrospective-data-entry/retrospective-data-entry.module';
+import { FakeRetrospectiveDataEntryService
+} from '../../../retrospective-data-entry/services/retrospective-data-entry-mock.service';
+import { RetrospectiveDataEntryService
+} from '../../../retrospective-data-entry/services/retrospective-data-entry.service';
 
 describe('Component: FormentryComponent', () => {
   let router = {
@@ -115,7 +121,8 @@ describe('Component: FormentryComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         CacheModule,
-        PatientReferralsModule
+        PatientReferralsModule,
+        RetrospectiveDataEntryModule
       ],
       providers: [
         PatientReminderResourceService,
@@ -213,6 +220,11 @@ describe('Component: FormentryComponent', () => {
           provide: UserDefaultPropertiesService, useFactory: () => {
             return new FakeDefaultUserPropertiesFactory();
           }, deps: []
+        },
+        {
+          provide: RetrospectiveDataEntryService, useFactory: () => {
+          return new FakeRetrospectiveDataEntryService();
+        }
         },
         {
           provide: AppFeatureAnalytics, useFactory: () => {

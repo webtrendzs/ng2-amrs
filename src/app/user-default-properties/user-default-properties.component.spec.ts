@@ -15,6 +15,13 @@ import { SessionStorageService } from '../utils/session-storage.service';
 import { UserMockService } from './user.service.mock';
 import { UserDefaultPropertiesModule } from './user-default-properties.module';
 import { BehaviorSubject } from 'rxjs';
+import { FakeRetrospectiveDataEntryService
+} from '../retrospective-data-entry/services/retrospective-data-entry-mock.service';
+import { RetrospectiveDataEntryService
+} from '../retrospective-data-entry/services/retrospective-data-entry.service';
+import { ProviderResourceService } from '../openmrs-api/provider-resource.service';
+import { Observable } from 'rxjs/Observable';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 class MockActivatedRoute {
   params;
@@ -39,6 +46,32 @@ class MockPropertyService {
 
   getLocations() {
     return (new BehaviorSubject(null)).asObservable();
+  }
+
+  getUserProperty() {
+    return {}
+  }
+}
+
+class MockProviderResourceService {
+  public v: string = 'full';
+
+  public getUrl(): string {
+    return 'provider';
+  }
+
+  public searchProvider(searchText: string, cached: boolean = false, v: string = null):
+  Observable<any> {
+    return Observable.of({});
+  }
+
+  public getProviderByUuid(uuid: string, cached: boolean = false, v: string = null):
+  Observable<any> {
+    return Observable.of({})
+  }
+  public getProviderByPersonUuid(uuid) {
+    let providerResults = new ReplaySubject(1);
+    return providerResults;
   }
 }
 
@@ -69,6 +102,11 @@ describe('Component: User Default Settings Unit Tests', () => {
           provide: UserDefaultPropertiesService,
           useClass: MockPropertyService
         },
+        {
+          provide: RetrospectiveDataEntryService, useFactory: () => {
+          return new FakeRetrospectiveDataEntryService();
+        }
+        },
         { provide : Location, useClass: SpyLocation },
         { provide : Router, useValue : jasmine.createSpyObj('Router', ['navigate'])  },
         AppSettingsService,
@@ -78,6 +116,11 @@ describe('Component: User Default Settings Unit Tests', () => {
         },
         { provide: ActivatedRoute, useClass: MockActivatedRoute },
         SessionStorageService,
+        {
+          provide: ProviderResourceService, useFactory: () => {
+          return new MockProviderResourceService();
+        }
+        },
         LocalStorageService
       ]
     }).compileComponents()
@@ -102,7 +145,7 @@ describe('Component: User Default Settings Unit Tests', () => {
 
   });
 
-  xit('should set default value of location from route params if you they are defined',
+  xit('should set default value of location from route params if they are defined',
     inject([Router, ActivatedRoute, UserDefaultPropertiesService, UserService],
       (r: Router, route: ActivatedRoute, t: UserDefaultPropertiesService, u: UserService) => {
         activeRoute.testParams = { confirm: 1 };
@@ -110,18 +153,14 @@ describe('Component: User Default Settings Unit Tests', () => {
         fixture.detectChanges();
         route.params.subscribe((params) => {
           expect(params['confirm']).toEqual(1);
-          expect(component.query).toEqual('test location');
+          expect(component.currentLocation).toEqual('test location');
         });
   }));
 
   it('should have required properties', (done) => {
     expect(component.locations.length).toEqual(0);
     expect(component.isBusy).toBeFalsy();
-    expect(typeof component.user).toBeDefined(User);
-    expect(component.query).toEqual('');
-    expect(component.filteredList.length).toEqual(0);
-    expect(component.currentLocation).toEqual('');
-    expect(component.selectedIdx).toEqual(-1);
+    expect(component.currentLocation).toBeFalsy(undefined);
     done();
 
   });
@@ -136,9 +175,9 @@ describe('Component: User Default Settings Unit Tests', () => {
     component.goToPatientSearch();
     expect(component.goToPatientSearch).toHaveBeenCalled();
 
-    spyOn(component, 'filter').and.callFake(() => {});
+    /*spyOn(component, 'filter').and.callFake(() => {});
     component.filter('click');
-    expect(component.filter).toHaveBeenCalled();
+    expect(component.filter).toHaveBeenCalled();*/
 
     spyOn(component, 'select').and.callFake(() => {});
     component.select({display: 'test'});
