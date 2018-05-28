@@ -176,7 +176,6 @@ import { NgSelectModule } from '@ng-select/ng-select';
     ButtonModule,
     DateTimePickerModule,
     ReferralModule,
-    NgSelectModule,
     AgGridModule.withComponents([
 
     ]),

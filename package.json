@@ -119,6 +119,7 @@
     "jsbarcode": "^3.8.0",
     "lodash": "^4.17.4",
     "moment": "2.19.3",
+    "ng-select": "^1.0.0-rc.5",
     "ng2-bootstrap": "^1.1.16",
     "ng2-bs3-modal": "^0.10.4",
     "ng2-openmrs-formentry": "git+https://github.com/AMPATH/ng2-opemmrs-formentry.git#v2.6.4",

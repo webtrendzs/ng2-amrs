@@ -1,0 +1,83 @@
+<div class="retro-data-entry">
+  <fieldset>
+    <legend *ngIf="!modalMode">Retrospective Data Entry</legend>
+    <div class="row m-t-20" *ngIf="!bannerMode">
+      <div class="col-md-12 col-xs-12">
+        <md-checkbox color="primary" labelPosition="after" (change)="saveRetroState($event)"
+                     [(ngModel)]="enableRetro">
+          Enable Retrospective Data Entry
+        </md-checkbox>
+      </div>
+    </div>
+    <ng-container *ngIf="enableRetro">
+      <div class="row" *ngIf="!bannerMode">
+        <div class="col-md-4 col-xs-12">
+          <div class="form-group">
+            <label>Provider</label>
+            <ng-select  class="sharp-corners" [(ngModel)]="provider" [items]="providers"
+                       (change)="saveProvider($event)"></ng-select>
+            <p class="text-danger" *ngIf="error && error.provider">Provider is required</p>
+          </div>
+        </div>
+        <div class="col-md-4 col-xs-12">
+          <div class="form-group">
+            <label>Visit Date</label>
+            <input class="form-control" type="date" name="visitDate" [value]="visitDate"
+                   [(ngModel)]="visitDate"
+                   (ngModelChange)="onDateChanged($event)" [max]="maxDate" [min]="'2000-01-01'">
+            <p class="text-danger" *ngIf="error && error.visitDate">Visit Date is required</p>
+          </div>
+        </div>
+        <div class="col-md-4 col-xs-12">
+          <div class="form-group">
+            <label>Visit Location <span *ngIf="!modalMode">(change above)</span> </label>
+            <div disabled class="form-control"><strong>{{location ? location.label : currentLocation.display}}</strong></div>
+          </div>
+        </div>
+        <div class="col-md-12 col-xs-12" *ngIf="modalMode">
+          <div class="form-group">
+            <label for="location">Select a Location</label>
+            <div class="input-group">
+              <div class="input-group-addon"><span class="glyphicon glyphicon-map-marker"></span>
+              </div>
+              <ng-select class="sharp-corners" placeholder="Please type to search" id="location"
+                         [(ngModel)]="location" [items]="locations"
+                         (change)="select($event)"></ng-select>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12 col-xs-12" *ngIf="!modalMode && !bannerMode">
+          <h5>
+            <strong>
+              <span class="fa-stack fa-lg">
+                  <i class="fa fa-circle-thin fa-stack-2x"></i>
+                  <i class="fa fa-info fa-stack-1x"></i>
+              </span>
+              Visit location will be your current location above. You can also change it from the
+              current visit page
+            </strong>
+          </h5>
+        </div>
+        <div class="col-md-12 col-xs-12">
+          <div class="form-group text-right" *ngIf="modalMode">
+            <button class="btn btn-primary" (click)="changeSettings(false)">Change</button>
+          </div>
+        </div>
+      </div>
+      <div class="row" *ngIf="bannerMode">
+        <div class="col-md-3 col-xs-6" *ngIf="provider">
+          Provider: <strong>{{provider.label}}</strong>
+        </div>
+        <div class="col-md-3 col-xs-6" *ngIf="location">
+          Location: <strong>{{location.label}}</strong>
+        </div>
+        <div class="col-md-3 col-xs-9" *ngIf="visitDate">
+          Visit Date: <strong>{{visitDate | date:'MMMM d, y'}}</strong>
+        </div>
+        <div class="col-md-3 col-xs-3">
+          <button class="btn btn-primary" (click)="changeSettings(true)">Update Settings</button>
+        </div>
+      </div>
+    </ng-container>
+  </fieldset>
+</div>

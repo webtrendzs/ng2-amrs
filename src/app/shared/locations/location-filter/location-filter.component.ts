@@ -56,10 +56,10 @@ export class LocationFilterComponent implements OnInit, AfterViewInit {
       this.selectedCounty = this.county;
     }
     if (this.locationUuids) {
-      if (this.multiple && _.isArray(this.locationUuids)) {
+      if (_.isArray(this.locationUuids) && this.multiple) {
         this.selectedLocations = this.locationUuids;
       } else {
-        this.selectedLocations = this.locationUuids;
+        this.selectedLocations = _.first(this.locationUuids);
       }
     }
     this.resolveLocationDetails();

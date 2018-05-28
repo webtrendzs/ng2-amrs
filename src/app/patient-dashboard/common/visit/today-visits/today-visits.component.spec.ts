@@ -10,7 +10,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 import { Observable } from 'rxjs/Observable';
 import { DialogModule } from 'primeng/primeng';
-import { SelectModule } from 'angular2-select';
 import { CacheService } from 'ionic-cache';
 import { BusyModule } from 'angular2-busy';
 
@@ -137,7 +136,6 @@ describe('TodayVisitsComponent', () => {
         UserDefaultPropertiesModule,
         DialogModule,
         FormsModule,
-        SelectModule,
         NgamrsSharedModule,
         PatientDashboardModule,
         HttpModule,

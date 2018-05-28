@@ -64,6 +64,8 @@ import { PatientEncounterObservationsComponent
 } from '../patient-dashboard/common/patient-encounters/patient-encounter-observations.component';
 import { PrettyEncounterViewerComponent
 } from '../patient-dashboard/common/formentry/pretty-encounter-viewer.component';
+import { RetrospectiveDataEntryModule
+} from '../retrospective-data-entry/retrospective-data-entry.module';
 
 @NgModule({
   imports: [
@@ -106,6 +108,7 @@ import { PrettyEncounterViewerComponent
     MdSnackBarModule
   ],
   exports: [BusyModule, LaddaModule, NgSelectModule, DisplayErrorComponent,
+    RetrospectiveDataEntryModule,
     PatientReferralContainerComponent, PatientEncounterObservationsComponent,
     StringToDatePipe, Ng2FilterPipe, OnlineTrackerComponent, HivProgramSnapshotComponent,
     BuildVersionComponent, BusyComponent, UnenrollPatientProgramsComponent,

@@ -10,7 +10,6 @@ import { Observable } from 'rxjs/Observable';
 import * as moment from 'moment';
 import { BusyModule, BusyConfig } from 'angular2-busy';
 import { DialogModule } from 'primeng/primeng';
-import { SelectModule } from 'angular2-select';
 import { CacheService } from 'ionic-cache';
 import { VisitDetailsComponent } from './visit-details.component';
 import { DataCacheService } from '../../../../shared/services/data-cache.service';
@@ -106,7 +105,6 @@ describe('VisitDetailsComponent: ', () => {
         UserDefaultPropertiesModule,
         DialogModule,
         FormsModule,
-        SelectModule,
         NgamrsSharedModule,
         PatientDashboardModule,
         HttpModule,
@@ -177,7 +175,7 @@ describe('VisitDetailsComponent: ', () => {
       'form:(uuid,name),location:ref,' +
       'encounterType:ref,provider:ref),patient:(uuid,uuid),' +
       'visitType:(uuid,name),location:ref,startDatetime,' +
-      'stopDatetime)';
+      'stopDatetime,attributes:(uuid,value))';
     expect(updateVisitSpy.calls.first().args[1]).toEqual({ v: expectedVisitVersion });
     expect(component.visit).toBe(visitClone);
   });

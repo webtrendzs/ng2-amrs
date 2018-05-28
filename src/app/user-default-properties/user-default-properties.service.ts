@@ -50,10 +50,12 @@ export class UserDefaultPropertiesService {
     if (propertyKey === 'userDefaultLocation') {
 
       propertyKey = propertyKey + this.getAuthenticatedUser().display;
-
       this.locationSubject.next(property);
-      this.localStorage.setItem(propertyKey, property);
     }
+    this.localStorage.setItem(propertyKey, property);
+  }
 
+  public getUserProperty(propertyKey) {
+    return this.localStorage.getItem(propertyKey);
   }
 }
