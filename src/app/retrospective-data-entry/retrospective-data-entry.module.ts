@@ -24,8 +24,8 @@ import { BusyComponent } from '../shared/busy-loader/busy.component';
   ],
   exports: [MdCheckboxModule, NgSelectModule, SettingsComponent, BusyComponent,
     RetrospectiveBannerComponent, EditRetroVisitProviderComponent],
-  declarations: [SettingsComponent, RetrospectiveBannerComponent, EditRetroVisitProviderComponent,
-    BusyComponent],
+  declarations: [BusyComponent, SettingsComponent, RetrospectiveBannerComponent,
+    EditRetroVisitProviderComponent],
   providers: [ DataCacheService, RetrospectiveDataEntryService,
     UserDefaultPropertiesService],
 })

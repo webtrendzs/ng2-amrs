@@ -327,7 +327,6 @@ export class FormentryComponent implements OnInit, OnDestroy {
 
   }
 
-<<<<<<< HEAD
   public onAbortingReferral(event) {
     this.showReferralDialog = false;
     this.referralCompleteStatus.next(false);

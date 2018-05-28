@@ -104,6 +104,7 @@ import { RetrospectiveDataEntryModule
     NgSelectModule,
     MdTabsModule,
     FormEntryModule,
+    RetrospectiveDataEntryModule,
     ConfirmDialogModule, DialogModule,
     MdSnackBarModule
   ],
@@ -111,7 +112,7 @@ import { RetrospectiveDataEntryModule
     RetrospectiveDataEntryModule,
     PatientReferralContainerComponent, PatientEncounterObservationsComponent,
     StringToDatePipe, Ng2FilterPipe, OnlineTrackerComponent, HivProgramSnapshotComponent,
-    BuildVersionComponent, BusyComponent, UnenrollPatientProgramsComponent,
+    BuildVersionComponent, UnenrollPatientProgramsComponent,
     ProgramsContainerComponent, ProgramsComponent, EnrollmentManagerFormWizardComponent,
     ProgramEnrollmentComponent, FormListComponent, ReportFiltersComponent,
     PatientReferralItemComponent, ZeroVlPipe, PrettyEncounterViewerComponent,
@@ -122,7 +123,7 @@ import { RetrospectiveDataEntryModule
     GeneralLandingPageComponent, ProgramsComponent, EnrollmentManagerFormWizardComponent,
     ProgramsContainerComponent, FormListComponent, PatientReferralContainerComponent,
     ProgramEnrollmentComponent, ReportFiltersComponent, PatientReferralItemComponent,
-    OnlineTrackerComponent, ToastComponent, BusyComponent, UnenrollPatientProgramsComponent,
+    OnlineTrackerComponent, ToastComponent, UnenrollPatientProgramsComponent,
     BuildVersionComponent, DateSelectorComponent, PdfViewerComponent, LocationFilterComponent,
     PatientEncounterObservationsComponent, PrettyEncounterViewerComponent
   ],
