@@ -13,6 +13,8 @@ import { RetrospectiveDataEntryService } from './services/retrospective-data-ent
 import { UserDefaultPropertiesService
 } from '../user-default-properties/user-default-properties.service';
 import { BusyComponent } from '../shared/busy-loader/busy.component';
+import { LocationFilterComponent
+} from '../shared/locations/location-filter/location-filter.component';
 @NgModule({
   imports: [
     FormsModule,
@@ -23,9 +25,10 @@ import { BusyComponent } from '../shared/busy-loader/busy.component';
     DialogModule
   ],
   exports: [MdCheckboxModule, NgSelectModule, SettingsComponent, BusyComponent,
+    LocationFilterComponent,
     RetrospectiveBannerComponent, EditRetroVisitProviderComponent],
   declarations: [BusyComponent, SettingsComponent, RetrospectiveBannerComponent,
-    EditRetroVisitProviderComponent],
+    EditRetroVisitProviderComponent, LocationFilterComponent],
   providers: [ DataCacheService, RetrospectiveDataEntryService,
     UserDefaultPropertiesService],
 })

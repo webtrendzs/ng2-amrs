@@ -1,10 +1,14 @@
 <div class="list-group-item" *ngIf="encounterVisitUuid">
     <div class="px-nested-panel-heading clearfix">
-      {{currentVisitType}} Started at: <strong>{{startDatetime | date: 'hh:mm:ss a MMM, dd yyyy'}} </strong>
+      {{currentVisitType}} Started at: <strong *ngIf="!retroProviderAttribute">{{startDatetime | date: 'hh:mm:ss a, MMM, dd yyyy'}} </strong>
+      <ng-container *ngIf="retroProviderAttribute">
+        <strong>{{startDatetime | date: 'hh:mm:ss a'}} </strong> today for
+        <strong>{{startDatetime | date: 'MMM, dd yyyy'}} </strong> retrospectively
+      </ng-container>
       <span *ngIf="stopDatetime">
        Ended at: <strong>{{stopDatetime | date: 'hh:mm:ss a MMM, dd yyyy'}}</strong>
        </span>
-      <span>At: <strong>{{locationName}}</strong></span>
+      <span>at: <strong>{{locationName}}</strong></span>
       <span *ngIf="retroProviderAttribute">
        By: <strong>{{retroProviderAttribute.label}}</strong>
        </span>

@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
 import * as moment from  'moment';
+import { isEqual } from 'lodash';
 
 import { UserDefaultPropertiesService } from
   '../../../../user-default-properties/index';
@@ -55,22 +56,13 @@ export class VisitStarterComponent implements OnInit {
     this._programEnrollmentUuid = v;
   }
 
-  private _selectedLocations: Array<any> = [];
-  public get selectedLocations(): Array<any> {
-    return this._selectedLocations;
-  }
-  public set selectedLocations(v: Array<any>) {
-    this._selectedLocations = v;
-    this.getCurrentProgramEnrollmentConfig();
-  }
-
+  private _selectedLocation: any;
   public get selectedLocation(): any {
-    return this._selectedLocations.length > 0 ? this._selectedLocations[0] : {};
+    return this._selectedLocation;
   }
   public set selectedLocation(v: any) {
-    if (this.selectedLocation.value && v.uuid !== this.selectedLocation.value) {
-      this.selectedLocations = [v];
-    }
+    this._selectedLocation = v;
+    this.getCurrentProgramEnrollmentConfig();
   }
 
   public get visitTypes(): Array<any> {
@@ -106,14 +98,18 @@ export class VisitStarterComponent implements OnInit {
 
   public setUserDefaultLocation() {
     let location: any = this.userDefaultPropertiesService.getCurrentUserDefaultLocationObject();
-    let retroSettings = this.retrospectiveDataEntryService.retroSettings.value;
-    if (location && location.uuid) {
-      if (retroSettings && retroSettings.enabled) {
-        this._selectedLocations.push(retroSettings.location);
-      } else {
-        this._selectedLocations.push({value: location.uuid, label: location.display});
+    this.retrospectiveDataEntryService.retroSettings.subscribe((retroSettings) => {
+      if (location && location.uuid) {
+        if (retroSettings && retroSettings.enabled) {
+          this.selectedLocation = retroSettings.location;
+        } else {
+          this.selectedLocation = {
+            value: location.uuid,
+            label: location.display
+          };
+        }
       }
-    }
+    });
   }
 
   public getCurrentProgramEnrollmentConfig() {

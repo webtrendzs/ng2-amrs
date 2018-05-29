@@ -37,13 +37,9 @@
         <div class="col-md-12 col-xs-12" *ngIf="modalMode">
           <div class="form-group">
             <label for="location">Select a Location</label>
-            <div class="input-group">
-              <div class="input-group-addon"><span class="glyphicon glyphicon-map-marker"></span>
-              </div>
-              <ng-select class="sharp-corners" placeholder="Please type to search" id="location"
-                         [(ngModel)]="location" [items]="locations"
-                         (change)="select($event)"></ng-select>
-            </div>
+            <location-filter id="location" [locationUuids]="location" [showLabel]="false"
+                             [disable-county]="true" [multiple]="false" (onLocationChange)="select($event)">
+            </location-filter>
           </div>
         </div>
         <div class="col-md-12 col-xs-12" *ngIf="!modalMode && !bannerMode">

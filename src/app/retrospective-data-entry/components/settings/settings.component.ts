@@ -106,7 +106,7 @@ export class SettingsComponent implements OnInit {
 
   public select(item) {
     this.retrospectiveDataEntryService.updateProperty('retroLocation',
-      JSON.stringify(item));
+      JSON.stringify(item.locations));
   }
 
   private _init() {

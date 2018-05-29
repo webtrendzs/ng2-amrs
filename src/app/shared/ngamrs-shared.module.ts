@@ -117,14 +117,14 @@ import { RetrospectiveDataEntryModule
     ProgramEnrollmentComponent, FormListComponent, ReportFiltersComponent,
     PatientReferralItemComponent, ZeroVlPipe, PrettyEncounterViewerComponent,
     DateSelectorComponent, PdfViewerComponent, NgxMyDatePickerModule, GeneralLandingPageComponent,
-    OpenmrsApi, EtlApi, Ng2Bs3ModalModule, ModalModule, LocationFilterComponent, ToastComponent],
+    OpenmrsApi, EtlApi, Ng2Bs3ModalModule, ModalModule, ToastComponent],
   declarations: [
     DisplayErrorComponent, StringToDatePipe, ZeroVlPipe, Ng2FilterPipe, HivProgramSnapshotComponent,
     GeneralLandingPageComponent, ProgramsComponent, EnrollmentManagerFormWizardComponent,
     ProgramsContainerComponent, FormListComponent, PatientReferralContainerComponent,
     ProgramEnrollmentComponent, ReportFiltersComponent, PatientReferralItemComponent,
     OnlineTrackerComponent, ToastComponent, UnenrollPatientProgramsComponent,
-    BuildVersionComponent, DateSelectorComponent, PdfViewerComponent, LocationFilterComponent,
+    BuildVersionComponent, DateSelectorComponent, PdfViewerComponent,
     PatientEncounterObservationsComponent, PrettyEncounterViewerComponent
   ],
   entryComponents: [

@@ -35,6 +35,16 @@ export class LocationFilterComponent implements OnInit, AfterViewInit {
   public loading: boolean = false;
   public locationDropdownOptions: Array<any> = [];
   public countyDropdownOptions: Array<any> = [];
+  @Input()
+  public get locationUuids(): any {
+    return this._locationUuids;
+  }
+  public set locationUuids(v: any) {
+    if (v) {
+      this.multiple ? this.selectedLocations.push(v) : this.selectedLocations = v;
+      this._locationUuids = v;
+    }
+  }
   public selectedLocations: Array<any> = [];
   public selectedCounty: string = '';
   public showReset: boolean = false;
@@ -43,9 +53,9 @@ export class LocationFilterComponent implements OnInit, AfterViewInit {
   @Input('disable-county') public disableCounty: boolean;
   @Input('multiple') public multiple: boolean;
   @Input('showLabel') public showLabel: boolean = true;
-  @Input() public locationUuids: any;
   @Input() public county: string;
   @Output() public onLocationChange = new EventEmitter<any>();
+  private _locationUuids: any;
 
   constructor(private locationResourceService: LocationResourceService,
               private cd: ChangeDetectorRef) {
@@ -56,11 +66,7 @@ export class LocationFilterComponent implements OnInit, AfterViewInit {
       this.selectedCounty = this.county;
     }
     if (this.locationUuids) {
-      if (_.isArray(this.locationUuids) && this.multiple) {
         this.selectedLocations = this.locationUuids;
-      } else {
-        this.selectedLocations = _.first(this.locationUuids);
-      }
     }
     this.resolveLocationDetails();
   }
@@ -68,7 +74,7 @@ export class LocationFilterComponent implements OnInit, AfterViewInit {
   public ngAfterViewInit(): void {
     this.cd.detectChanges();
   }
-  public onLocationSelected(locations: Array<any>) {
+  public onLocationSelected(locations) {
     if (this.selectedCounty && this.selectedCounty !== 'N/A') {
       this.getLocationsByCounty().then((countyLocations) => {
         if (locations && _.isArray(locations) && locations.length < countyLocations.length) {

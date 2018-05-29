@@ -1,6 +1,6 @@
 <div class="loader" *ngIf="startedVisit"><span><i class="fa fa-spinner fa-spin">
       </i>Starting Visit...please wait</span></div>
-  <location-filter [locationUuids]="selectedLocations" [showLabel]="false"
+  <location-filter [locationUuids]="selectedLocation" [showLabel]="false"
   [disable-county]="true" [multiple]="false" (onLocationChange)="onLocationChanged($event)">
   </location-filter>
 <div *ngIf="error !== ''" class="alert alert-danger alert-dismissible">
