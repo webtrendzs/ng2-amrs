@@ -11,7 +11,7 @@ import { ProgramWorkFlowResourceService
 import { ProgramWorkFlowStateResourceService
 } from '../../../openmrs-api/program-workflow-state-resource.service';
 
-import { PatientReferralService } from '../../services/patient-referral-service';
+import { PatientReferralService } from '../../../program-manager/patient-referral-service';
 import { UserService } from '../../../openmrs-api/user.service';
 
 @Component({
@@ -161,9 +161,8 @@ export class PatientReferralItemComponent implements OnInit, OnChanges {
   private enrollPatientInReferredProgram(programInfo) {
     console.log('this.program', this.program);
     // 1. Enroll patient
-    this.patientReferralService.enrollPatient(this.program.programUuid,
-      this.patient, this.location, this.selectedWorkFlowState, '')
-      .take(1).subscribe((enrollment) => {
+  this.patientReferralService.createUpdatePatientEnrollment(programInfo).take(1)
+    .subscribe((enrollment) => {
           this.newErollment = enrollment;
           // 2. Save encounter
           _.extend(programInfo, {

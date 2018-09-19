@@ -8,7 +8,7 @@ import { Patient } from '../../../models/patient.model';
 import * as _ from 'lodash';
 import { Subscription ,  BehaviorSubject ,  Subject } from 'rxjs';
 import { ConfirmationService } from 'primeng/primeng';
-import { PatientReferralService } from '../../services/patient-referral-service';
+import { PatientReferralService } from '../../../program-manager/patient-referral-service';
 import { EnrollementWorkflowService } from '../../services/enrollment-workflow-service';
 import { UserService } from '../../../openmrs-api/user.service';
 import { UserDefaultPropertiesService

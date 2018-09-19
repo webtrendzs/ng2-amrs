@@ -11,7 +11,7 @@ import { Program } from '../../models/program.model';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { FormListService } from '../../../patient-dashboard/common/forms/form-list.service';
-import { PatientReferralService } from '../../services/patient-referral-service';
+import { PatientReferralService } from '../../../program-manager/patient-referral-service';
 
 @Component({
   selector: 'program-enrollment-manager-form-wizard',

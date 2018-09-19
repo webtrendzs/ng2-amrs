@@ -32,6 +32,8 @@ import { SessionStorageService } from '../utils/session-storage.service';
 import { HttpClient } from '../shared/services/http-client.service';
 import { ReferralModule } from '../referral-module/referral-module';
 import { PatientDashboardResolver } from './services/patient-dashboard.resolver';
+import { ProgramManagerModule
+} from '../program-manager/program-manager.module';
 
 @NgModule({
   imports: [
@@ -54,6 +56,7 @@ import { PatientDashboardResolver } from './services/patient-dashboard.resolver'
     PatientDashboardDermatologyModule,
     PatientSearchModule,
     ProgramTransferCareModule,
+    ProgramManagerModule,
     ReferralModule,
     RouterModule.forChild(routes)
   ],

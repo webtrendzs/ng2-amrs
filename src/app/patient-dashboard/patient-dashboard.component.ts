@@ -8,7 +8,8 @@ import * as Moment from 'moment';
 import { ToastrService } from 'ngx-toastr';
 import { AppFeatureAnalytics } from '../shared/app-analytics/app-feature-analytics.service';
 import { DynamicRoutesService } from '../shared/dynamic-route/dynamic-routes.service';
-import { PatientRoutesFactory } from '../navigation/side-navigation/patient-side-nav/patient-side-nav-routes.factory';
+import { PatientRoutesFactory
+} from '../navigation/side-navigation/patient-side-nav/patient-side-nav-routes.factory';
 
 @Component({
   selector: 'app-patient-dashboard',

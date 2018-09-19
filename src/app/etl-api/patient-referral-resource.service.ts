@@ -134,8 +134,8 @@ export class PatientReferralResourceService {
     return request;*/
   }
 
-  public getReferralLocationByEnrollmentUuid(uuid: string) {
-    let url = this.getReferralLocationUrl()  + '/' + uuid;
+  public getReferralByLocationUuid(locationUuid: string, enrollmentUud?: string) {
+    let url = this.getReferralLocationUrl()  + '/' + locationUuid + '/' + enrollmentUud;
     return this.http.get(url).pipe(map((response: Response) => {
         return response.json();
     }));

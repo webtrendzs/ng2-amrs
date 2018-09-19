@@ -39,10 +39,11 @@ import { FormentryReferralsHandlerService } from './formentry-referrals-handler.
 import { ProgramsTransferCareService } from '../../programs/transfer-care/transfer-care.service';
 
 import { ConceptResourceService } from '../../../openmrs-api/concept-resource.service';
-import { PatientReferralService } from '../../../referral-module/services/patient-referral-service';
+import { PatientReferralService } from '../../../program-manager/patient-referral-service';
 import { EncounterType } from '../../../models/encounter-type.model';
 import { RetrospectiveDataEntryService
 } from '../../../retrospective-data-entry/services/retrospective-data-entry.service';
+import { PersonResourceService } from '../../../openmrs-api/person-resource.service';
 
 @Component({
   selector: 'app-formentry',
@@ -71,9 +72,11 @@ export class FormentryComponent implements OnInit, OnDestroy {
     orders: []
   };
   public submittedEncounter: any;
+  public referralStatus: any;
   public diffCareReferralStatus: any = undefined;
   public transferCareForm: string = null;
   public programEncounter: string = null;
+  public step: number;
   public referralEncounterType: string;
   public encounterLocation: any;
   private subscription: Subscription;
@@ -108,7 +111,8 @@ export class FormentryComponent implements OnInit, OnDestroy {
               private formentryHelperService: FormentryHelperService,
               private patientReminderService: PatientReminderService,
               private transferCareService: ProgramsTransferCareService,
-              private confirmationService: ConfirmationService) {
+              private confirmationService: ConfirmationService,
+              private personResourceService: PersonResourceService) {
   }
 
   public ngOnInit() {
@@ -124,6 +128,7 @@ export class FormentryComponent implements OnInit, OnDestroy {
       componentRef.encounterUuid = params['encounter'];
       componentRef.transferCareForm = params['transferCareEncounter'];
       componentRef.programEncounter = params['programEncounter'];
+      componentRef.step = params['step'] ? parseInt(params['step'], 10) :  null;
       componentRef.referralEncounterType = params['referralEncounterType'];
       if (componentRef.draftedFormsService.lastDraftedForm !== null &&
         componentRef.draftedFormsService.lastDraftedForm !== undefined &&
@@ -245,33 +250,28 @@ export class FormentryComponent implements OnInit, OnDestroy {
             { queryParams: { processId: processId } });
         }
         break;
-      case 'enrollmentManager':
+      case 'programManager':
         this.preserveFormAsDraft = false;
-        this.patientReferralService.getProcessPayload().take(1).subscribe((payload) => {
-          if (payload && _.isUndefined(payload.submittedEncounter)) {
-            // use this processId to signal end of process
-            _.extend(payload, {
-              processId: _.uniqueId('referral_')
-            });
-            this.patientReferralService.saveProcessPayload(_.extend(payload,
-              {
-                submittedEncounter: {
-                  encounter: this.submittedEncounter,
-                  encounterLocation: this.encounterLocation
-                }
-              }));
-          }
-        });
         this.route.queryParams.subscribe((params) => {
-          let toLandingPage = params['parentComponent'] === 'landing-page';
-          if (toLandingPage) {
+          let step = params['parentComponent'].split(':')[1];
+          if (step  === 'landing-page') {
             this.router.navigate(['/patient-dashboard/patient/' +
-              this.patient.uuid + '/general/general/landing-page']);
-          } else {
+            this.patient.uuid + '/general/general/landing-page']);
+          } else if (step === 'new') {
             this.router.navigate(['/patient-dashboard/patient/' +
-              this.patient.uuid + '/general/general/programs/enrollment-manager']);
+            this.patient.uuid + '/general/general/program-manager/new-program', 'step',
+              params['step']]);
+          } else if (step === 'edit') {
+            this.router.navigate(['/patient-dashboard/patient/' +
+            this.patient.uuid + '/general/general/program-manager/edit-program', 'step',
+              params['step']]);
           }
         });
+        break;
+      case 'programManagerReferral':
+        this.preserveFormAsDraft = false;
+        this.router.navigate(['/patient-dashboard/patient/' +
+        this.patient.uuid + '/general/general/program-manager/new-program', 'step', 3]);
         break;
       case 'patientSearch':
         this.preserveFormAsDraft = false;
@@ -343,7 +343,7 @@ export class FormentryComponent implements OnInit, OnDestroy {
   }
 
   public onAbortingReferral(event) {
-    this.showReferralDialog = false;
+    this.referralStatus = null;
     this.referralCompleteStatus.next(false);
   }
 
@@ -355,43 +355,76 @@ export class FormentryComponent implements OnInit, OnDestroy {
 
   public shouldShowPatientReferralsDialog(data: any): void {
     this.submittedEncounter = data;
+    const referralData = {
+      submittedEncounter: data
+    };
     // check if referral question was filled (questionId is either referrals or patientReferrals)
-    let referralQuestion = this.form.searchNodeByQuestionId('referrals');
-    if (referralQuestion.length === 0) {
-      referralQuestion = this.form.searchNodeByQuestionId('patientReferrals');
-    }
-    // if form has `Patient State` question
-    if (referralQuestion.length === 0) {
-      referralQuestion = this.form.searchNodeByQuestionId('state');
-    }
+    let referralQuestion = this.form.searchNodeByQuestionId('patientReferral');
     // if question exists provide for referrals
     if (referralQuestion.length > 0 && _.isNil(this.programEncounter)) {
-      let answer = _.first(referralQuestion).control.value;
-      if (answer) {
-        let dermEncounterTypes = ['DERMATOLOGY', 'DERMATOLOGYREFERRAL', 'DERMINITIAL',
-          'DERMRESPONSE', 'DERMRETURN'];
-        if (_.includes(dermEncounterTypes, this.form.schema.encounterType.name)) {
-          this.referralPrograms = _.filter(this.patient.enrolledPrograms, (program: any) => {
-            return program.programUuid === 'b3575274-1850-429b-bb8f-2ff83faedbaf'
-              || program.programUuid === '781d8768-1359-11df-a1f1-0026b9348837';
-          });
-          if (this.referralPrograms.length > 0) {
-            this.showReferralDialog = true;
-          }
-        } else {
+      // get answer from the selected answer
+      const referralPrograms = this.form.searchNodeByQuestionId('referralsOrdered');
+      if (referralPrograms) {
+        const answer = _.first(referralPrograms).control.value;
           // map concept with program
           this.searchReferralConcepts(answer).take(1).subscribe((concepts) => {
             this.referralPrograms = _.filter(this.patient.enrolledPrograms, (program: any) => {
               return _.includes(_.map(concepts, 'uuid'), program.concept.uuid);
             });
+            if (this.referralPrograms.length > 0) {
+              _.extend(referralData, {
+                isReferral: true,
+                selectedProgram: _.first(this.referralPrograms)
+              });
+              this.referralStatus = referralData;
+            }
           });
-          if (this.referralPrograms.length > 0) {
-            this.showReferralDialog = true;
-          }
-        }
       }
     } else {
       this.referralCompleteStatus.next(false);
+    }
+  }
+
+  public updatePatientDemographics(data: any): void {
+    // check if patient status was filled
+    // (questionId is patstat in Outreach Field Follow-Up Form V1.0)
+    let patientCareStatus = this.form.searchNodeByQuestionId('patstat');
+    let deathDate = this.form.searchNodeByQuestionId('deathDate');
+    let causeOfDeath = this.form.searchNodeByQuestionId('reasdeath');
+    if (causeOfDeath.length === 0 ) {
+      causeOfDeath = this.form.searchNodeByQuestionId('deathCause');
+    }
+
+    // if question exists provide for demographic update
+    /* UPDATE: at the moment, only deathDate  and cause are the only consistent concepts across
+     *  the forms.
+     *  none of the fields are required. By assumption, if someone fills death death and cause,
+     *  the patient is dead
+     */
+
+    if (patientCareStatus.length > 0
+      && _.first(patientCareStatus).control.value !== 'a89335d6-1350-11df-a1f1-0026b9') {
+      this.personResourceService.saveUpdatePerson(this.patient.uuid, {
+        dead : false,
+        deathDate: null,
+        causeOfDeath: null
+      }).subscribe(() => {
+
+        });
+    }
+
+    if ((causeOfDeath.length > 0 && _.first(causeOfDeath).control.value.length > 0)
+      && (deathDate.length > 0 && _.first(deathDate).control.value.length > 0)) {
+        let personNamePayload = {
+          dead: true,
+          deathDate: _.first(deathDate).control.value,
+          causeOfDeath: _.first(causeOfDeath).control.value
+        };
+
+        this.personResourceService.saveUpdatePerson(this.patient.uuid, personNamePayload)
+          .subscribe(() => {
+
+        });
     }
   }
 
@@ -856,7 +889,7 @@ export class FormentryComponent implements OnInit, OnDestroy {
     this.formSubmissionErrors = null;
     this.failedPayloadTypes = null;
     // this.showSuccessDialog = true;
-
+    this.updatePatientDemographics(response);
     // handle referrals here
     this.handleFormReferrals(response);
   }

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, OnDestroy } from '@angular/core';
+
 import { PatientService } from '../services/patient.service';
 import { ProgramEnrollment } from '../../models/program-enrollment.model';
 import * as _ from 'lodash';
@@ -8,7 +9,7 @@ import { UserDefaultPropertiesService
 
 import { Subject, Subscription } from 'rxjs';
 import { Patient } from '../../models/patient.model';
-import { PatientReferralService } from '../../referral-module/services/patient-referral-service';
+import { PatientReferralService } from '../../program-manager/patient-referral-service';
 
 @Component({
   selector: 'program-enrollment',

@@ -3,17 +3,17 @@ import * as _ from 'lodash';
 import * as moment from 'moment';
 import { Observable ,  BehaviorSubject } from 'rxjs';
 
-import { ProgramService } from '../../patient-dashboard/programs/program.service';
-import { Patient } from '../../models/patient.model';
-import { EncounterResourceService } from '../../openmrs-api/encounter-resource.service';
-import { ProgramReferralResourceService } from '../../etl-api/program-referral-resource.service';
+import { ProgramService } from '../patient-dashboard/programs/program.service';
+import { Patient } from '../models/patient.model';
+import { EncounterResourceService } from '../openmrs-api/encounter-resource.service';
+import { ProgramReferralResourceService } from '../etl-api/program-referral-resource.service';
 import {
     ProviderResourceService
-} from '../../openmrs-api/provider-resource.service';
-import { PatientProgramResourceService } from '../../etl-api/patient-program-resource.service';
+} from '../openmrs-api/provider-resource.service';
+import { PatientProgramResourceService } from '../etl-api/patient-program-resource.service';
 import { ProgramsTransferCareService
-} from '../../patient-dashboard/programs/transfer-care/transfer-care.service';
-import { PatientReferralResourceService } from '../../etl-api/patient-referral-resource.service';
+} from '../patient-dashboard/programs/transfer-care/transfer-care.service';
+import { PatientReferralResourceService } from '../etl-api/patient-referral-resource.service';
 
 @Injectable()
 export class PatientReferralService {
@@ -28,11 +28,15 @@ export class PatientReferralService {
 
   }
 
-  public enrollPatient(programUuid, patient: Patient, location, state, enrollmentUuid) {
-      let enrollPayload = this.programService.createEnrollmentPayload(
-        programUuid, patient, this.toOpenmrsDateFormat(new Date()), null,
-        location, enrollmentUuid);
-      return this.programService.saveUpdateProgramEnrollment(enrollPayload);
+  public createUpdatePatientEnrollment(payload) {
+    let enrollPayload = this.programService.createEnrollmentPayload(
+      payload.programUuid,
+      payload.patient,
+      payload.dateEnrolled || this.toOpenmrsDateFormat(new Date()),
+      payload.dateCompleted ? payload.dateCompleted : null,
+      payload.location,
+      payload.enrollmentUuid);
+    return this.programService.saveUpdateProgramEnrollment(enrollPayload);
   }
 
   public saveReferralEncounter(encounter: any) {
@@ -47,9 +51,9 @@ export class PatientReferralService {
     return this.programsTransferCareService.getPayload();
   }
 
-  public getReferredByLocation(enrollmentUuid): Observable<any> {
+  public getReferredByLocation(locationUuid, enrollmentUud?): Observable<any> {
     return this.patientReferralResourceService
-      .getReferralLocationByEnrollmentUuid(enrollmentUuid);
+      .getReferralByLocationUuid(locationUuid, enrollmentUud);
 
   }
 
@@ -106,7 +110,7 @@ export class PatientReferralService {
     return this.programsTransferCareService.pickEncountersByLastFilledDate(encounters, date);
   }
 
-  public getProviderReferralPatientList(params: any) {
+  public getReferralPatientList(params: any) {
     let referralInfo: BehaviorSubject<any> = new BehaviorSubject<any>([]);
     let referralObservable = this.patientReferralResourceService
       .getPatientReferralPatientList({
@@ -114,12 +118,8 @@ export class PatientReferralService {
       locationUuids: params.locationUuids,
       startDate: params.startDate,
       startAge: params.startAge,
-      endAge: params.endAge,
-      gender: params.gender,
       programUuids: params.programUuids,
-      stateUuids: params.stateUuids,
-      providerUuids: params.providerUuids,
-      startIndex: params.startIndex,
+      startIndex: params.startIndex
     });
 
     if (referralObservable === null) {
@@ -144,7 +144,7 @@ export class PatientReferralService {
 
   public getProgramEnrollmentReferralLocation(enrollmentUuid: any) {
     let referral: BehaviorSubject<any> = new BehaviorSubject<any>([]);
-    let referralObservable = this.patientReferralResourceService.getReferralLocationByEnrollmentUuid
+    let referralObservable = this.patientReferralResourceService.getReferralByLocationUuid
     (enrollmentUuid);
 
     if (referralObservable === null) {

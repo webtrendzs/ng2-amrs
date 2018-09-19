@@ -13,13 +13,13 @@ landing-page {
 }
 
 .program .program-header, .program .program-footer{
-  margin: 10px 20px 10px 20px;
+  margin: 0 20px 0 20px;
   font-size: 1.72rem;
   border: none;
   padding: 0 0;
   font-family: Lato, 'Helvetica Neue', Arial, Helvetica, sans-serif;
   font-weight: 700;
-  line-height: 1.29em;
+  line-height: 36px;
   text-transform: none;
   color: #fff;
   opacity: 0.9;
@@ -156,18 +156,6 @@ h3 {
 .program-header-wrapper {
   background-color: #203864;
   color: #ccc;
-}
-
-.program .program-header, .program .program-footer{
-  margin: 10px 20px 10px 20px;
-  font-size: 1.72rem;
-  border: none;
-  padding: 0 0;
-  font-family: Lato, 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  font-weight: 700;
-  line-height: 1.29em;
-  text-transform: none;
-  color: #fff;
 }
 
 .program.non-enrolled .program-body{

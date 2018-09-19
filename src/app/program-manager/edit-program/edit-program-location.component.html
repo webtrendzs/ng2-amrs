@@ -1,0 +1,49 @@
+<busy *ngIf="updating" [message]="'Updating...'"></busy>
+<div class="step-details">
+  <ng-container *ngFor="let program of programs">
+    <blockquote class="step-details" style="border-left: 0;"
+                *ngIf="program && program.dateEnrolled && !program.dateCompleted">
+      <p><input checked name="program_{{program.enrolledProgram._openmrsModel.uuid}}" value="{{program.enrolledProgram._openmrsModel.uuid}}"
+                (change)="updateProgramsToEdit($event)" type="checkbox"/>
+        {{program.enrolledProgram._openmrsModel.display}} <span
+          class="pull-right">{{program.enrolledProgram._openmrsModel.location?.display}}</span></p>
+      <footer>Started {{program.dateEnrolled}}</footer>
+      <hr/>
+    </blockquote>
+  </ng-container>
+  <div class="row" style="position: relative;" *ngIf="!complete">
+    <div class="col-md-6 col-xs-12 col-sm-6 cell">
+      <location-filter [disable-county]="true" [showLabel]="true" (onLocationChange)="selectLocation($event)"></location-filter>
+    </div>
+    <div class="col-md-6 col-xs-12 col-sm-6 cell">
+      <label for="enrolledDate">Date Enrolled</label>
+      <div>
+        <input class="form-control" id="enrolledDate" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}"
+               [(ngModel)]="dateEnrolled" type="date"/>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-bottom: 20px;" class="alert alert-success" *ngIf="complete">
+  <div class="step-name">
+    <h3 style="margin-top: 0; margin-bottom: 0;">{{editedProgram?.display}}</h3>
+  </div>
+  <div class="step-details">
+    <div class="program-body">
+      <h3>1. New Location</h3>
+      <p><strong>{{editedProgram.location?.display}}</strong></p>
+      <h3>2. Date Changed</h3>
+      <p><strong>{{editedProgram.dateEnrolled | date: 'longDate'}}</strong></p>
+    </div>
+  </div>
+</div>
+<div class="step-buttons" *ngIf="!complete">
+  <button  type="button" class="btn btn-danger pull-left"
+          (click)="goBack()">Back
+  </button>
+  <button class="btn pull-right"
+          (click)="completeLocationChange()">Change Location
+  </button>
+</div>

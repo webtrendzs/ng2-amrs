@@ -142,6 +142,7 @@ import { SessionStorageService } from '../../utils/session-storage.service';
 import { HttpClient } from '../../shared/services/http-client.service';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { PatientImagingComponent } from './imaging/patient-imaging.component';
+import { ProgramManagerModule } from '../../program-manager/program-manager.module';
 
 @NgModule({
   imports: [
@@ -185,6 +186,7 @@ import { PatientImagingComponent } from './imaging/patient-imaging.component';
     HivCareLibModule,
     PatientSearchModule,
     PatientReferralsModule,
+    ProgramManagerModule,
     ProgramTransferCareModule
   ],
   exports: [

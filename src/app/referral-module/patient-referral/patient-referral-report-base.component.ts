@@ -8,21 +8,19 @@ import {
 import {
   PatientReferralResourceService
 } from '../../etl-api/patient-referral-resource.service';
-import { PatientReferralService } from '../services/patient-referral-service';
+import { PatientReferralService } from '../../program-manager/patient-referral-service';
 
 @Component({
   selector: 'patient-referral-report-base',
-  template: 'referral-report-base.component.html'
+  template: './patient-referral-report-base.component.html'
 })
 export class PatientReferralBaseComponent implements OnInit {
   public data: any = [];
   public sectionsDef = [];
   public isAggregated: boolean;
   public programs: any;
-  public states: any;
-  // public providers: any;
 
-  public enabledControls = 'datesControl,programWorkFlowControl' +
+  public enabledControls = 'datesControl' +
     'ageControl,genderControl,locationControl';
   public startAge: number;
   public endAge: number;
@@ -34,10 +32,6 @@ export class PatientReferralBaseComponent implements OnInit {
   public reportName: string = '';
   public dates: any;
   public programUuids: any;
-  public age: any;
-  public provider = '';
-  @Input() public ageRangeStart: number;
-  @Input() public ageRangeEnd: number;
 
   private _startDate: Date = Moment().subtract(1, 'months').toDate();
   public get startDate(): Date {
@@ -67,24 +61,6 @@ export class PatientReferralBaseComponent implements OnInit {
     this._locationUuids = v;
   }
 
-  private _conceptUuids: Array<string>;
-  public get conceptUuids(): Array<string> {
-    return this._conceptUuids;
-  }
-
-  public set conceptUuids(v: Array<string>) {
-    this._conceptUuids = v;
-  }
-
-  private _gender: Array<string>;
-  public get gender(): Array<string> {
-    return this._gender;
-  }
-
-  public set gender(v: Array<string>) {
-    this._gender = v;
-  }
-
   constructor(public patientReferralResourceService: PatientReferralResourceService,
               public dataAnalyticsDashboardService: DataAnalyticsDashboardService) {
   }
@@ -98,44 +74,25 @@ export class PatientReferralBaseComponent implements OnInit {
       startDate: this.startDate,
       endDate: this.endDate
     };
-    this.age = {
-      startAge: this.startAge,
-      endAge: this.endAge
-    };
 
     this.encounteredError = false;
     this.errorMessage = '';
     this.isLoadingReport = true;
-
     let filterLocation = this.getSelectedLocations(this.locationUuids);
-    console.log('filterLocation', filterLocation);
-    let filterProvider = this.provider ;
-    let loadSourceType = this.dataAnalyticsDashboardService.getUrlSource();
-    // disable provider filter when searching for refer patients for current location
-    if (loadSourceType === 'REFER') {
-          filterProvider = 'undefined';
-    }
+    const params = {
+      endDate: this.toDateString(this.endDate),
+      startDate: this.toDateString(this.startDate),
+      locationUuids: filterLocation
+    };
 
-    // disable Location filter when searching for refer back patients for current location
-    if (loadSourceType === 'REFERBACK') {
-          filterLocation = 'undefined';
-     }
+    if (!_.isUndefined(this.programs)) {
+      _.extend(params, {
+        programUuids: this.programs
+      });
+    }
     this.patientReferralResourceService
-      .getPatientReferralReport({
-        endDate: this.toDateString(this.endDate),
-        gender: this.gender ? this.gender : 'F,M',
-        startDate: this.toDateString(this.startDate),
-        programUuids: this.programs,
-        locationUuids: filterLocation,
-        stateUuids: this.states,
-        startAge: this.startAge,
-        endAge: this.endAge,
-        providerUuids: filterProvider,
-        notificationStatus: 'All'
-      }).take(1).subscribe(
-      (data) => {
+      .getPatientReferralReport(params).take(1).subscribe((data) => {
         this.isLoadingReport = false;
-        this.sectionsDef = _.uniqBy(data.stateNames, 'name');
         this.data = this.getProgramData(data);
 
       }, (error) => {
@@ -144,25 +101,6 @@ export class PatientReferralBaseComponent implements OnInit {
         this.errorMessage = error;
         this.encounteredError = true;
       });
-  }
-
-  public onAgeChangeFinished($event) {
-    this.startAge = $event.ageFrom;
-    this.endAge = $event.ageTo;
-  }
-
-  public getSelectedGender(selectedGender) {
-    let gender;
-    if (selectedGender) {
-      for (let i = 0; i < selectedGender.length; i++) {
-        if (i === 0) {
-          gender = '' + selectedGender[i];
-        } else {
-          gender = gender + ',' + selectedGender[i];
-        }
-      }
-    }
-    return this.gender = gender;
   }
 
   public getSelectedPrograms(programsUuids): string {
@@ -181,23 +119,6 @@ export class PatientReferralBaseComponent implements OnInit {
     }
 
     return this.programs = selectedPrograms;
-  }
-
-  public getSelectedStates(stateUuids): string {
-    if (!stateUuids || stateUuids.length === 0) {
-      return '';
-    }
-
-    let selectedStates = '';
-
-    for (let i = 0; i < stateUuids.length; i++) {
-      if (i === 0) {
-        selectedStates = selectedStates + stateUuids[0].value;
-      } else {
-        selectedStates = selectedStates + ',' + stateUuids[i].value;
-      }
-    }
-    return this.states = selectedStates;
   }
 
   public onTabChanged(event) {

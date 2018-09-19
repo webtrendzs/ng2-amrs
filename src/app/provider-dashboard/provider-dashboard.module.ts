@@ -6,7 +6,7 @@ import { RouterModule } from '@angular/router';
 import { routes } from './provider-dashboard.routes';
 import { ProviderDashboardComponent } from './provider-dashboard.component';
 import { DateTimePickerModule } from 'ngx-openmrs-formentry/dist/ngx-formentry/';
-import { PatientReferralService } from '../referral-module/services/patient-referral-service';
+import { PatientReferralService } from '../program-manager/patient-referral-service';
 import { ProgramService } from '../patient-dashboard/programs/program.service';
 import { EncounterResourceService } from '../openmrs-api/encounter-resource.service';
 // import {

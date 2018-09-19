@@ -12,13 +12,14 @@ import { Patient } from '../../models/patient.model';
 import { PatientProgramResourceService } from '../../etl-api/patient-program-resource.service';
 import { DepartmentProgramsConfigService
 } from '../../etl-api/department-programs-config.service';
-import { PatientReferralService } from '../../referral-module/services/patient-referral-service';
+import { PatientReferralService } from '../../program-manager/patient-referral-service';
 import { UserDefaultPropertiesService
 } from '../../user-default-properties/user-default-properties.service';
 import { PatientReferralResourceService } from '../../etl-api/patient-referral-resource.service';
 import { Encounter } from '../../models/encounter.model';
 import { ModalComponent } from 'ng2-bs3-modal/ng2-bs3-modal';
 import { ModalDirective } from 'ngx-bootstrap/modal';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Component({
   selector: 'landing-page',
@@ -80,7 +81,10 @@ export class GeneralLandingPageComponent implements OnInit, OnDestroy {
 //  public programList: any[] = require('../programs/programs.json');
   public availableDepartmentPrograms: any[] = [];
   public selectedEncounter: Encounter;
+  public selectedVisitEncounter: Encounter;
   public showReferralEncounterDetail: boolean = false;
+  public showVisitEncounterDetail: boolean = false;
+  public loadingEncounter: boolean = false;
   public encounterViewed: boolean = false;
   private departmentConf: any[];
   private _datePipe: DatePipe;
@@ -147,27 +151,52 @@ export class GeneralLandingPageComponent implements OnInit, OnDestroy {
   }
 
   public showReferralEncounter(row: any) {
-    this.getProgramWorkflows(row.programUuid);
-    let referralEncounters = _.filter(this.patient.encounters, (encounter: any) => {
-        if (encounter && encounter.location && encounter.location.uuid) {
-            return encounter.location.uuid === row.referred_from_location_uuid;
-        }
-      });
+    const visitEncounter = _.find(this.patient.encounters, (encounter) => {
+      return encounter.location.uuid === row.referred_from_location_uuid
+        && encounter.uuid === row.encounter_uuid;
+    });
 
-    this.selectedEncounter = new Encounter(_.first(referralEncounters));
-    if (this.selectedEncounter && this.selectedEncounter.uuid) {
-      this.patientReferralService.getReferralEncounterDetails(this.selectedEncounter.uuid)
-        .take(1).subscribe((encounterWithObs) => {
-        // search for PATIENT CHANGE STATE obs item. PATIENT CHANGE STATE is a required field
-        let patientState = _.find(encounterWithObs.obs, (singleOb) => {
-          return singleOb.concept.uuid === 'aad64a84-1a63-47e3-a806-fb704b52b709';
-        });
-        this.referralProgramOnDetail = row;
-        // override the default state value
-        this.referralProgramOnDetail.program_workflow_state = patientState.value.display;
-        this.staticModal.show();
-        this.showReferralEncounterDetail = true;
+    const enrollmentForms = this.filterRequiredEnrollmentForms(row);
+    let referralEncounter = _.find(this.patient.encounters, (encounter) => {
+      return encounter.location.uuid === row.referred_from_location_uuid
+        && _.includes(enrollmentForms, encounter.encounterType.uuid);
+    });
+
+    if (visitEncounter) {
+      this.selectedVisitEncounter = new Encounter(visitEncounter);
+      // hide by default
+      this.showVisitEncounterDetail = false;
+    }
+
+    if (referralEncounter) {
+      this.selectedEncounter = new Encounter(referralEncounter);
+      // show by default
+      this.showReferralEncounterDetail = true;
+    }
+
+    this.staticModal.show();
+  }
+
+  public patientHasBeenSeenInProgram(program) {
+    if (!_.isUndefined(program.referred_from_location)) {
+      const patientEncounters = this.patient.encounters;
+      const enrollmentForms = this.filterRequiredEnrollmentForms(program);
+      let referralEncounter = _.find(patientEncounters, (encounter) => {
+        // patient was referred to this location
+        if (encounter.location.uuid === program.referred_from_location_uuid
+          && _.includes(enrollmentForms, encounter.encounterType.uuid)) {
+
+          const localEncounter = _.find(patientEncounters, (_encounter) => {
+            return moment(_encounter.encounterDatetime)
+              .isAfter(moment(encounter.encounterDatetime));
+          });
+          return !_.isNil(localEncounter);
+        }
+
+        return false;
       });
+      return !_.isNil(referralEncounter)
+
     }
   }
 
@@ -176,6 +205,11 @@ export class GeneralLandingPageComponent implements OnInit, OnDestroy {
     this.staticModal.hide();
     this.encounterViewed = true;
     this.selectedEncounter = null;
+  }
+
+  public toggleDetailEncounter() {
+    this.showVisitEncounterDetail = this.showReferralEncounterDetail;
+    this.showReferralEncounterDetail = !this.showVisitEncounterDetail;
   }
 
   public referBack(row: any) {
@@ -363,15 +397,27 @@ export class GeneralLandingPageComponent implements OnInit, OnDestroy {
     this.workflowStates = this.selectedWorkflow.states;
   }
 
-  public isReferred(enrolledProgram: any): boolean {
-    let refer = '0c5565c5-45cf-40ab-aa6d-5694aeabae18';
-    // enforce current location
-    let location = (this.userDefaultPropertiesService.getCurrentUserDefaultLocationObject())
-      .uuid;
-    let filtered = _.filter(enrolledProgram.states, (patientState: any) => {
-      return patientState.endDate === null && patientState.state.concept.uuid === refer;
+  public getReferralLocation(enrolledPrograms: any[]) {
+    let programBatch: Array<Observable<any>> = [];
+    let location = this.userDefaultPropertiesService.getCurrentUserDefaultLocationObject();
+    _.each(enrolledPrograms, (program) => {
+      programBatch.push(this.getReferralByLocation(location.uuid, program.enrolledProgram.uuid));
     });
-    return filtered.length > 0 && location === enrolledProgram.location.uuid;
+
+    return Observable.forkJoin(programBatch);
+  }
+
+  public getReferralByLocation(locationUuid: string, enrollmentUuid: string): Observable<any> {
+    return Observable.create((observer: BehaviorSubject<any[]>) => {
+      this.patientReferralService.getReferredByLocation(locationUuid, enrollmentUuid)
+        .subscribe((data) => {
+          if (data) {
+            observer.next(data);
+          }
+        }, (error) => {
+          observer.error(error);
+        });
+    }).first();
   }
 
   public fetchPatientProgramVisitConfigs() {
@@ -412,6 +458,16 @@ export class GeneralLandingPageComponent implements OnInit, OnDestroy {
       && !_.isUndefined(program.enrollmentOptions.requiredProgramQuestions)) {
       this.requiredProgramQuestions = program.enrollmentOptions.requiredProgramQuestions;
     }
+  }
+
+  public filterRequiredEnrollmentForms(program): string[] {
+    let _program: any = this.allProgramVisitConfigs[program.programUuid];
+    if (_program && !_.isUndefined(_program.enrollmentOptions)
+      && !_.isUndefined(_program.enrollmentOptions.stateChangeEncounterTypes)) {
+      const encounterTypes = _program.enrollmentOptions.stateChangeEncounterTypes.referral;
+      return _.map(_.filter(encounterTypes, 'required'), 'uuid');
+    }
+    return [];
   }
 
   public onRequiredQuestionChange(event: string) {
@@ -463,14 +519,8 @@ export class GeneralLandingPageComponent implements OnInit, OnDestroy {
     this.programForms = [];
   }
 
-  public getReferredByLocation(enrollmentUuid): Observable<any> {
-    return this.patientReferralResourceService
-      .getReferralLocationByEnrollmentUuid(enrollmentUuid);
-
-  }
-
-  public removeFromQueue() {
-    this.updateReferalNotificationStatus()
+  public removeFromQueue(program) {
+    this.updateReferalNotificationStatus(program);
   }
 
   private updateEnrollmentButtonState() {
@@ -585,19 +635,23 @@ export class GeneralLandingPageComponent implements OnInit, OnDestroy {
           this.availableProgramsOptions = _.orderBy(this.availableProgramsOptions,
             ['label'], ['asc']);
           this.enrolledProgrames = _.filter(patient.enrolledPrograms, 'isEnrolled');
-          _.each(this.enrolledProgrames, (program) => {
-              if (this.isReferred(program.enrolledProgram)) {
-                this.getReferredByLocation(program.enrolledProgram.uuid)
-                  .take(1).subscribe((referral) => {
-                    program.referred_from_location = referral.referred_from_location;
-                    program.referral_completed = !_.isNil(referral.notification_status);
-                    program.referral_reason = referral.referral_reason;
-                    program.program_workflow_state = referral.program_workflow_state;
-                    program.patient_referral_id = referral.patient_referral_id;
-                    program.referred_from_location_uuid = referral.referred_from_location_uuid;
-                });
-              }
+          this.getReferralLocation(this.enrolledProgrames).take(1).subscribe( (reply: any) => {
+            if (reply) {
+              _.each(this.enrolledProgrames, (program, index) => {
+                let referral = reply[index];
+                if (referral) {
+                  _.extend(program , referral, {
+                    referral_completed : !_.isNil(referral.notification_status)
+                  });
+                  if (this.patientHasBeenSeenInProgram(program)) {
+                    program.referral_completed = true;
+                    this.updateReferalNotificationStatus(program).take(1).subscribe(() => {});
+                  }
+                }
+              });
+            }
           });
+          /**/
           this.fetchPatientProgramVisitConfigs();
         }
       }, (err) => {
@@ -613,15 +667,10 @@ export class GeneralLandingPageComponent implements OnInit, OnDestroy {
       this.subscriptions.push(sub);
   }
 
-  private updateReferalNotificationStatus() {
-    this.patientReferralService.updateReferalNotificationStatus({
-      patient_referral_id: this.referralProgramOnDetail.patient_referral_id,
+  private updateReferalNotificationStatus(program) {
+    return this.patientReferralService.updateReferalNotificationStatus({
+      patient_referral_id: program.patient_referral_id,
       notificationStatus: 1
-    }).take(1).subscribe((response) => {
-      this.hideEncounterModal();
-      this.patientService.reloadCurrentPatient();
-    }, (error) => {
-      console.log('updateReferalNotificationStatus error ====> ', error);
     });
   }
 

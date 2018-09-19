@@ -10,7 +10,7 @@ import { ProgramWorkFlowResourceService
 import { ProgramWorkFlowStateResourceService
 } from '../../../openmrs-api/program-workflow-state-resource.service';
 
-import { PatientReferralService } from '../../services/patient-referral-service';
+import { PatientReferralService } from '../../../program-manager/patient-referral-service';
 import { PatientService } from '../../../patient-dashboard/services/patient.service';
 import { UserDefaultPropertiesService
 } from '../../../user-default-properties/user-default-properties.service';
@@ -67,9 +67,7 @@ export class PatientReferralVisitComponent implements OnInit, OnChanges {
   public updateEnrollmentState() {
     this.isUpdating = true;
     // 1. Update enroll patient
-    this.patientReferralService.enrollPatient(this.program.programUuid,
-      this.patient, this.location, this.selectedWorkFlowState, this.program.uuid)
-      .take(1).subscribe((enrollment) => {
+  this.patientReferralService.createUpdatePatientEnrollment({}).subscribe((enrollment) => {
           this.patientService.reloadCurrentPatient();
           // this.toggleUpdateButton(false);
           this.display = false;

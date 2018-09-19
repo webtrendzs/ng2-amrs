@@ -23,11 +23,7 @@ export class PatientReferralTabularComponent implements OnInit {
   public overrideColumns: Array<any> = [];
   public extraColumns: Array<any> = [];
   public patientData: any;
-  public startAge: any;
-  public stateName: any;
   public programName: any;
-  public endAge: any;
-  public stateUuid: any;
   public startIndex: number = 0;
   public isLoading: boolean = false;
   public dataLoaded: boolean = false;
@@ -39,9 +35,10 @@ export class PatientReferralTabularComponent implements OnInit {
 
   @ViewChild('agGrid')
   public agGrid: AgGridNg2;
-  private routeParamsSubscription: Subscription;
-  private _sectionDefs: Array<any>;
   private _notificationStatus = 'All';
+
+  private _sectionDefs: Array<any>;
+
   public get sectionDefs(): Array<any> {
     return this._sectionDefs;
   }
@@ -74,38 +71,7 @@ export class PatientReferralTabularComponent implements OnInit {
     this._programUuid = v;
   }
 
-  private _gender: any;
-  public get gender(): any {
-    return this._gender;
-  }
-
-  @Input('gender')
-  public set gender(v: any) {
-    this._gender = v;
-  }
-
-  private _age: any;
-  public get age(): any {
-    return this._age;
-  }
-
-  @Input('age')
-  public set age(v: any) {
-    this._age = v;
-  }
-
-  private _provider: any;
-  public get provider(): any {
-    return this._provider;
-  }
-  @Input('provider')
-  public set provider(v: any) {
-    this._provider = v;
-  }
-
   constructor(private router: Router,
-              private route: ActivatedRoute,
-              private dataAnalyticsDashboardService: DataAnalyticsDashboardService,
               public resourceService: PatientReferralResourceService) {
   }
 
@@ -125,8 +91,7 @@ export class PatientReferralTabularComponent implements OnInit {
       {
         headerName: 'Program',
         field: 'program'
-      }
-      );
+      });
     if (this.data) {
         _.each(sectionsData, (data) => {
             defs.push({
@@ -135,13 +100,27 @@ export class PatientReferralTabularComponent implements OnInit {
             });
         });
     }
-    this.gridOptions.columnDefs = defs;
-    if (this.agGrid && this.agGrid.api) {
-      this.agGrid.api.setColumnDefs(defs);
-      this.agGrid.api.sizeColumnsToFit();
-      this.gridOptions.groupDefaultExpanded = -1;
 
-    }
+    this.gridOptions.columnDefs = defs;
+
+    this.gridOptions.enableColResize = true;
+    this.gridOptions.enableSorting = false;
+    this.gridOptions.enableFilter = false;
+    this.gridOptions.toolPanelSuppressSideButtons = true;
+    this.gridOptions.getRowStyle = (params) => {
+      return {'font-size': '14px', 'cursor': 'pointer'};
+    };
+
+    this.gridOptions.onGridReady = (event) => {
+      setTimeout( () => {
+        if (this.gridOptions.api) {
+          this.agGrid.api.setColumnDefs(defs);
+          this.gridOptions.api.sizeColumnsToFit();
+          this.gridOptions.groupDefaultExpanded = -1;
+        }
+      }, 500, true);
+    };
+
   }
 
   public titleCase(str) {
@@ -151,41 +130,21 @@ export class PatientReferralTabularComponent implements OnInit {
   }
 
   public onCellClicked(event) {
-    let data = this.getSelectedStates(event);
-    this.stateUuid = data;
     this.programName = event.data.program;
-    this.stateName = event.colDef.headerName.split('_').join(' ');
     this.generatePatientListReport(event);
   }
 
   public generatePatientListReport(data) {
     this.isLoading = true;
-    let loadSourceType = this.dataAnalyticsDashboardService.getUrlSource();
     let filterLocation =  data.data.locationUuids ? data.data.locationUuids : null;
-    let filterProvider =  this.provider ? this.provider : null;
-
-        // disable provider filter when searching for refer patients for current location
-    if (loadSourceType === 'REFER') {
-          filterProvider = 'undefined';
-    }
-
-    // disable Location filter when searching for refer back patients for current location
-    if (loadSourceType === 'REFERBACK') {
-          filterLocation = 'undefined';
-     }
 
     this.resourceService.getPatientReferralPatientList({
       endDate: this.toDateString(this._dates.endDate),
       locationUuids: filterLocation,
       startDate: this.toDateString(this._dates.startDate),
-      startAge: this.startAge ? this.startAge : null,
-      endAge: this.endAge ? this.endAge : null,
-      gender: this.gender ? this.gender : null,
       programUuids: data.data.programUuids ? data.data.programUuids : null,
-      stateUuids: this.stateUuid ? this.stateUuid : null,
-      providerUuids: filterProvider,
       startIndex: this.startIndex ? this.startIndex : null,
-      notificationStatus: this._notificationStatus,
+      notificationStatus: null,
     }).take(1).subscribe((report) => {
       this.patientData = report;
        // this.patientData ? this.patientData.concat(report) : report;
@@ -204,38 +163,7 @@ export class PatientReferralTabularComponent implements OnInit {
           return '<a href="javascript:void(0);" title="Identifiers">'
             + column.value + '</a>';
         }
-      }
-      );
-
-      this.extraColumns.push(
-        {
-          headerName: 'Initial Referral Date',
-          field: 'initial_referral_date',
-          cellRenderer: (params) => {
-            let date = '';
-            let time = '';
-            if (params.value) {
-                date = Moment(params.value).format('DD-MM-YYYY');
-                time = Moment(params.value).format('H:mmA');
-            }
-
-            return  '<small>' + date + '</small>';
-        }
-        },
-        {
-          headerName: 'Current State Date',
-          field: 'current_state_date',
-          cellRenderer: (params) => {
-            let date = '';
-            let time = '';
-            if (params.value) {
-                date = Moment(params.value).format('DD-MM-YYYY');
-            }
-
-            return  '<small>' + date + '</small>';
-        }
-        }
-        );
+      });
     });
   }
 
@@ -253,21 +181,6 @@ export class PatientReferralTabularComponent implements OnInit {
 
   private toDateString(date: Date): string {
     return Moment(date).utcOffset('+03:00').format();
-  }
-
-  private getSelectedStates(event) {
-    let stateUuid = '';
-    let selectedField = event.colDef.field;
-    let selectedUuid = selectedField + '_conceptUuids';
-
-    _.each(event.data, (v, k) => {
-      if (k === selectedUuid) {
-
-        stateUuid = v;
-      }
-
-    });
-    return stateUuid;
   }
 
 }

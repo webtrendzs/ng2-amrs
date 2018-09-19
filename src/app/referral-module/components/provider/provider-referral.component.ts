@@ -14,16 +14,19 @@ import {
 } from '../../../data-analytics-dashboard/services/data-analytics-dashboard.services';
 import * as Moment from 'moment';
 import { UserDefaultPropertiesService } from '../../../user-default-properties';
-import { PatientReferralService } from '../../services/patient-referral-service';
+import { PatientReferralService } from '../../../program-manager/patient-referral-service';
 
 @Component({
   selector: 'provider-referrals',
-  templateUrl: '../../patient-referral/referral-report-base.component.html'
+  templateUrl: '../../patient-referral/patient-referral-report-base.component.html'
 })
 export class ProviderReferralComponent extends PatientReferralBaseComponent
   implements OnInit {
   public data = [];
   public errors = [];
+  public provider: any;
+  public gender: any;
+  public states: any;
   public sectionsDef = [];
   public programName: any;
   public enabledControls = 'locationControl,datesControl,programWorkFlowControl';

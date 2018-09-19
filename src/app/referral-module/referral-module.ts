@@ -11,7 +11,7 @@ import { ProgramWorkFlowStateResourceService
 } from '../openmrs-api/program-workflow-state-resource.service';
 import { ProgramEnrollmentResourceService
 } from '../openmrs-api/program-enrollment-resource.service';
-import { PatientReferralService } from './services/patient-referral-service';
+import { PatientReferralService } from '../program-manager/patient-referral-service';
 import { PatientReferralVisitComponent } from './components/visit/patient-referral-visit.component';
 import { ProgramReferralResourceService } from '../etl-api/program-referral-resource.service';
 import { DataListsModule } from '../shared/data-lists/data-lists.module';

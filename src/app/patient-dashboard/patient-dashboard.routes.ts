@@ -41,6 +41,13 @@ import {
 import { PatientDashboardResolver } from './services/patient-dashboard.resolver';
 import { PatientCreationComponent } from '../patient-creation/patient-creation.component';
 import { PatientImagingComponent } from './common/imaging/patient-imaging.component';
+import { ProgramManagerContainerComponent
+} from '../program-manager/container/program-manager-container.component';
+import { ProgramSummaryComponent
+} from '../program-manager/program-summary/program-summary.component';
+import { NewProgramComponent } from '../program-manager/new-program/new-program.component';
+import { EditProgramComponent } from '../program-manager/edit-program/edit-program.component';
+
 
 
 export const routes = [
@@ -160,7 +167,43 @@ export const routes = [
           },
           { path: ':programClass/:program/clinical-notes', component: ClinicalNotesComponent },
           { path: ':programClass/:program/visit', component: TodayVisitsComponent },
-          { path: ':programClass/:program/locator-map', component: LocatorMapComponent }
+          { path: ':programClass/:program/locator-map', component: LocatorMapComponent },
+          {
+            path: ':programClass/:program/program-manager',
+            component: ProgramManagerContainerComponent,
+            children: [
+              {
+                path: '',
+                redirectTo: 'program-summary', pathMatch: 'full',
+                canActivate: []
+              },
+              {
+                path: 'program-summary',
+                component: ProgramSummaryComponent,
+                canDeactivate: []
+              },
+              {
+                path: 'new-program',
+                component: NewProgramComponent,
+                canDeactivate: []
+              },
+              {
+                path: 'new-program/step/:step',
+                component: NewProgramComponent,
+                canDeactivate: []
+              },
+              {
+                path: 'edit-program',
+                component: EditProgramComponent,
+                canDeactivate: []
+              },
+              {
+                path: 'edit-program/step/:step',
+                component: EditProgramComponent,
+                canDeactivate: []
+              }
+            ]
+          },
         ]
       }
     ]

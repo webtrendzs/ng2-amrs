@@ -13,7 +13,7 @@ import {
 import {
   PatientReferralService
 } from
-  '../referral-module/services/patient-referral-service';
+  '../program-manager/patient-referral-service';
 import * as Moment from 'moment';
 import { Location } from '@angular/common';
 @Component({
@@ -82,8 +82,7 @@ export class PatientSearchComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit() {
-    this.getPatientReferrals(this.REFER_CONCEPT_UUID);
-    this.getPatientReferrals(this.REFERBACK_CONCEPT_UUID);
+    // this.getPatientReferrals();
     if (window.innerWidth <= 768) {
       this.adjustInputMargin = '0';
     }
@@ -199,129 +198,61 @@ export class PatientSearchComponent implements OnInit, OnDestroy {
     this.noMatchingResults = false;
   }
 
-  public tooltipStateChanged(state: boolean): void {
-    // console.log(`Tooltip is open: ${state}`);
-  }
-
   public resetInputMargin() {
     if (window.innerWidth > 768) {
       this.adjustInputMargin = '240px';
     }
   }
 
-  public loadReferredData() {
-    this.router.navigate(['/provider-dashboard'],
+  public loadReferralPatientList() {
+    this.router.navigate(['/clinic-dashboard', this.locationUuids
+        , 'general', 'referral', 'patient-referral-report'],
     {queryParams: {
       'endDate': this.endDate,
-      'startDate': this.startDate,
-      'locationUuids': (this.locationUuids as any),
-      'stateUuids': this.REFER_CONCEPT_UUID,
-      'urlSource': 'REFER'
-    }});
-    // this.referralService.setUrlSource('REFER');
-  }
-  public loadReferredBackData() {
-    this.router.navigate(['/provider-dashboard'],
-    {queryParams: {
-      'endDate': this.endDate,
-      'startDate': this.startDate,
-      'providerUuids': (this.providerUuids as any),
-      'stateUuids': this.REFERBACK_CONCEPT_UUID,
-      'urlSource': 'REFERBACK'
+      'startDate': this.startDate
     }});
   }
 
-  private getPatientReferrals( referalType: any) {
+  private getPatientReferrals() {
     let location = this.defaultPropertiesService.getCurrentUserDefaultLocationObject()
             || {};
     let selectedLocationUuid = location.uuid || 'Default location not set';
-    let user = this.defaultPropertiesService.getAuthenticatedUser()
-            || {};
-
-    this.referralService.getUserProviderDetails(user)
-      .then((provider) => {
-        this.providerUuid = provider.uuid;
-        let currentDateMoment = Moment(new Date());
-        let endDate =  currentDateMoment.format('YYYY-MM-DD');
-        let startDate = currentDateMoment.add(-1, 'M').format('YYYY-MM-DD');
-
-        let params = this.getRequestParams(referalType, this.providerUuid,
-           selectedLocationUuid, startDate, endDate);
-        this.referralSubscription = this.referralService.getProviderReferralPatientList(params)
-          .subscribe(
-            (referralData) => {
-              this.loadingReferralProviders = false;
-              if (referralData.length >= 1) {
-                 if (referalType === this.REFERBACK_CONCEPT_UUID) {
-                  this.referredBack = referralData;
-                 }
-
-                 if (referalType === this.REFER_CONCEPT_UUID) {
-                  this.referred = referralData;
-                 }
-                 this.dataLoaded = true;
-
-              } else {
-                this.dataLoaded = false;
-              }
-
-            },
-            (error) => {
-              this.loadingReferralProviders = false;
+    this.locationUuids = selectedLocationUuid;
+    let currentDateMoment = Moment(new Date());
+    let endDate =  currentDateMoment.format('YYYY-MM-DD');
+    let startDate = currentDateMoment.add(-1, 'M').format('YYYY-MM-DD');
+    let params = this.getRequestParams(selectedLocationUuid, startDate, endDate);
+    this.referralSubscription = this.referralService.getReferralPatientList(params)
+      .subscribe(
+        (referralData) => {
+          this.loadingReferralProviders = false;
+          if (referralData.length >= 1) {
+              this.referred = referralData;
               this.dataLoaded = true;
-              this.errors.push({
-                id: 'Referral Providers',
-                message: 'error fetching referral providers'
-              });
-            }
-          );
-      })
-      .catch((error) => {
-        this.errors.push({
-          id: 'Referral Providers',
-          message: 'error fetching current user provider information'
+          } else {
+            this.dataLoaded = false;
+          }
+
+        }, (error) => {
+          this.loadingReferralProviders = false;
+          this.dataLoaded = true;
+          this.errors.push({
+            id: 'Referral Info',
+            message: 'error fetching referral info'
+          });
         });
-      });
 
   }
 
-  private getRequestParams(referalType, provider, location, startDate, endDate) {
+  private getRequestParams(location, startDate, endDate) {
     let params = {
       endDate: endDate,
       locationUuids: location,
-      startDate: startDate,
-      providerUuids: provider,
-      stateUuids: referalType
+      startDate: startDate
     };
 
-    if (referalType === this.REFER_CONCEPT_UUID) {
-      // do not filter by provider when getting referred patients
-      delete params['providerUuids'];
-      this.locationUuids = location;
-    }
-
-    if (referalType === this.REFERBACK_CONCEPT_UUID) {
-      // do not filter by location when getting referred back patients
-      delete params['locationUuids'];
-      this.providerUuids = provider;
-    }
     this.startDate = startDate;
     this.endDate = endDate;
     return params;
-  }
-
-   private getCurrentProvider(user: any) {
-            if (user) {
-              this.referralService.getUserProviderDetails(user)
-                .then((provider) => {
-                  this.providerUuid = provider.uuid;
-                })
-                .catch((error) => {
-                  this.errors.push({
-                  id: 'Referral Providers',
-                 message: 'error fetching current user provider information'
-                  });
-                });
-            }
   }
 }
