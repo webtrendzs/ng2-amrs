@@ -44,7 +44,7 @@ export class PatientService {
       this.encounterResource.getEncountersByPatientUuid(patientUuid)
     );
 
-    return subj.take(1).subscribe(
+    return subj.subscribe(
       (data) => {
         let patient = data[0];
         patient.enrolledPrograms = data[1];
