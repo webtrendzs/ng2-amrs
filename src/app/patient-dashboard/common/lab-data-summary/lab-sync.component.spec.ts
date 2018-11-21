@@ -21,6 +21,9 @@ describe('LabSyncComponent', () => {
         currentlyLoadedPatient: Observable.of({ uuid: '', person: { uuid: 'persion_uui' } })
     };
     let fakeLabsServiceName = {
+      getUpgradePatientLabResults:() => {
+        return Observable.of([{}]);
+      },
         getNewPatientLabResults: (args) => {
             return Observable.of(
                 [{
