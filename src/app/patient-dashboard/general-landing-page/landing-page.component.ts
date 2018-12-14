@@ -38,7 +38,7 @@ export class GeneralLandingPageComponent implements OnInit, OnDestroy {
   public hasError: boolean = false;
   public programsBusy: boolean = false;
   public errors: any[] = [];
-  public addBackground: any;
+  public addBackground: any = 'white';
   public enrolledProgrames: any = [];
   public allProgramVisitConfigs: any = {};
   public selectedEncounter: Encounter;
@@ -129,7 +129,10 @@ export class GeneralLandingPageComponent implements OnInit, OnDestroy {
   }
 
   public onAddBackground(color) {
-    this.addBackground = color;
+    setTimeout(() => {
+      this.addBackground = color;
+    });
+
   }
 
   public getReferralLocation(enrolledPrograms: any[]) {
@@ -163,6 +166,7 @@ export class GeneralLandingPageComponent implements OnInit, OnDestroy {
         this.allProgramVisitConfigs = programConfigs;
       },
       (error) => {
+        this.programsBusy = false;
         this.errors.push({
           id: 'program configs',
           message: 'There was an error fetching all the program configs'

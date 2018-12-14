@@ -99,10 +99,10 @@ export class PatientDashboardComponent implements OnInit, OnDestroy, DoCheck {
         if(patient) {
           const sub2 = this.getCombinedResult(patient).pipe(take(1)).subscribe((results: any[]) => {
             // the intention of combining is to have both systems sync. So we take just one result
-            if (results.length > 0) {
-              const result = results[1];
+            if (results && results.length > 0) {
+              const result = results[1][0];
               let content = '';
-              for (let test of result) {
+              for (let test of result['updatedObs']) {
                 if (test.groupMembers) {
                   for (let l of test.groupMembers) {
                     if (l.uuid === '5538cd04-9852-40f8-88ba-c69da32e50eb') {
