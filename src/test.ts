@@ -15,7 +15,6 @@ getTestBed().initTestEnvironment(
   platformBrowserDynamicTesting()
 );
 // Then we find all the tests.
-const context = require.context('./', true, /app\/patient-dashboard\/common\/formentry\/form-submission\.service\.spec\.ts$/);
-// const context = require.context('./', true, /\.spec\.ts$/);
+const context = require.context('./', true, /app\/data-analytics-dashboard\/oncology\/oncology-reports\/oncology-monthly-indicators\/oncology-monthly-indicators\.component\.spec\.ts$/);
 // And load the modules.
 context.keys().map(context);
