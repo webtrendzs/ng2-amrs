@@ -413,7 +413,10 @@ export class FormentryComponent implements OnInit, OnDestroy {
     const referralQuestion = this.getReferralsQuestion();
     let force = false;
     if (referralQuestion.length > 0) {
-      force = true;
+      const answer = _.first(referralQuestion).control.value;
+      if (_.isArray(answer)) {
+        force = _.includes(answer, 'a9431295-9862-405b-b694-534f093ca0ad');
+      }
     }
     let step = [];
     if (this.shouldRedirectToProgramManager(patientCareStatus, force)) {
