@@ -3,11 +3,12 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AppSettingsService } from '../app-settings/app-settings.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { DataCacheService } from '../shared/services/data-cache.service';
 
 @Injectable()
 export class PatientProgramResourceService {
 
-  constructor(private http: HttpClient, private appSettingsService: AppSettingsService) {
+  constructor(private http: HttpClient, private appSettingsService: AppSettingsService, private cacheService: DataCacheService) {
   }
 
   public getAllProgramVisitConfigs(ttl?: number): Observable<any> {
@@ -18,8 +19,12 @@ export class PatientProgramResourceService {
 
   public getPatientProgramVisitConfigs(patientUuid: string): Observable<any> {
     let url = this.appSettingsService.getEtlRestbaseurl().trim();
-    url += 'patient-program-config?patientUuid=' + patientUuid;
-    return this.http.get(url);
+    url += 'patient-program-config';
+    const urlParams: HttpParams = new HttpParams().set('patientUuid', patientUuid);
+    const request = this.http.get(url, {
+      params: urlParams
+    });
+    return this.cacheService.cacheRequest(url, urlParams, request);
   }
   /**
    *

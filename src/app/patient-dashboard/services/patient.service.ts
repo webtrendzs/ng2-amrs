@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
+
 import { ReplaySubject, BehaviorSubject, Observable, forkJoin, combineLatest } from 'rxjs';
 import { Patient } from '../../models/patient.model';
 import { PatientResourceService } from '../../openmrs-api/patient-resource.service';
 import { EncounterResourceService } from '../../openmrs-api/encounter-resource.service';
 import { PatientProgramService } from '../programs/patient-programs.service';
+import { shareReplay } from 'rxjs/operators';
 
 @Injectable()
 export class PatientService {
@@ -42,7 +44,7 @@ export class PatientService {
       this.patientResourceService.getPatientByUuid(patientUuid, false),
       this.patientProgramsService.getCurrentlyEnrolledPatientPrograms(patientUuid),
       this.encounterResource.getEncountersByPatientUuid(patientUuid)
-    ).subscribe(
+    ).pipe(shareReplay()).subscribe(
       (data) => {
         const patient = data[0];
         patient.enrolledPrograms = data[1];

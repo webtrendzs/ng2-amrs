@@ -5,6 +5,8 @@ import { AppSettingsService } from '../app-settings/app-settings.service';
 import { LocalStorageService } from '../utils/local-storage.service';
 import { PatientProgramResourceService } from './patient-program-resource.service';
 import { HttpTestingController, HttpClientTestingModule } from '@angular/common/http/testing';
+import { CacheModule, CacheService } from 'ionic-cache';
+import { DataCacheService } from '../shared/services/data-cache.service';
 
 describe('Patient Program Resource Service Unit Tests', () => {
   let service, httpMock;
@@ -12,11 +14,12 @@ describe('Patient Program Resource Service Unit Tests', () => {
   const datePipe = new DatePipe('en-US');
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [ HttpClientTestingModule ],
+      imports: [ HttpClientTestingModule, CacheModule.forRoot() ],
       providers: [
         PatientProgramResourceService,
         AppSettingsService,
-        LocalStorageService
+        LocalStorageService,
+        DataCacheService
       ]
     });
     service = TestBed.get(PatientProgramResourceService);
@@ -25,6 +28,7 @@ describe('Patient Program Resource Service Unit Tests', () => {
   });
 
   afterEach(() => {
+    httpMock.verify();
     TestBed.resetTestingModule();
   });
 
@@ -72,9 +76,9 @@ describe('Patient Program Resource Service Unit Tests', () => {
       .subscribe((response) => {
         done();
       });
-    const req = httpMock.expectOne(appsetting.getEtlRestbaseurl().trim() +
-      'patient-program-config?patientUuid=uuid');
+    const req = httpMock.expectOne(appsetting.getEtlRestbaseurl().trim() + 'patient-program-config');
     expect(req.request.method).toBe('GET');
+    expect(req.request.urlWithParams).toContain('patientUuid=uuid');
     req.flush(JSON.stringify({}));
 
   });
