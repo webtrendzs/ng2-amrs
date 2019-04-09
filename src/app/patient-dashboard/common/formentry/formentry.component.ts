@@ -424,7 +424,8 @@ export class FormentryComponent implements OnInit, OnDestroy {
         'notice': 'outreach'
       };
       // MCH/PMTCT
-      if (_.first(patientCareStatus).control.value === 'a8a17d80-1350-11df-a1f1-0026b9348838') {
+      if (_.includes(['a8a17d80-1350-11df-a1f1-0026b9348838', '1f09e809-8ea3-45e6-a71f-16e6a0d72390'],
+        _.first(patientCareStatus).control.value)) {
         // PMTCT Uuid
         _.merge(queryParams, {
           program: '781d897a-1359-11df-a1f1-0026b9348838',
@@ -433,7 +434,7 @@ export class FormentryComponent implements OnInit, OnDestroy {
         step = ['step', 3];
       }
       // Enhanced adherence HIV Program
-      if (_.includes(_.first(referralQuestion).control.value, 'a9431295-9862-405b-b694-534f093ca0ad')) {
+      if (force && _.includes(_.first(referralQuestion).control.value, 'a9431295-9862-405b-b694-534f093ca0ad')) {
         // Enhanced adherence HIV Program
         _.merge(queryParams, {
           program: 'c4246ff0-b081-460c-bcc5-b0678012659e',
@@ -461,8 +462,10 @@ export class FormentryComponent implements OnInit, OnDestroy {
     if (answer.length > 0) {
       return _.includes([
         'a89c2f42-1350-11df-a1f1-0026b9348838', // AMPATH
+        'a89c2e5c-1350-11df-a1f1-0026b9348838', // AMPATH (Defaulter tracing form)
         'a89c301e-1350-11df-a1f1-0026b9348838', // Non-AMPATH
-        'a8a17d80-1350-11df-a1f1-0026b9348838' // MCH/PMTCT
+        'a8a17d80-1350-11df-a1f1-0026b9348838', // MCH/PMTCT
+        '1f09e809-8ea3-45e6-a71f-16e6a0d72390' // MCH/PMTCT (Defaulter tracing form)
       ], _.first(answer).control.value);
     }
     return false;
@@ -470,10 +473,14 @@ export class FormentryComponent implements OnInit, OnDestroy {
 
   private getPatientStatusQuestion() {
     // (questionId is patstat in Outreach Field Follow-Up Form V1.0)
-    // (questionId is careStatus in Transfer Out Form v0.01 and other forms
     let patientCareStatus = this.form.searchNodeByQuestionId('patstat');
+    // (questionId is careStatus in Transfer Out Form v0.01 and other forms
     if (patientCareStatus.length === 0) {
       patientCareStatus = this.form.searchNodeByQuestionId('careStatus');
+    }
+    // (questionId is patientIssues in Defaulter Tracing Form V1.0)
+    if (patientCareStatus.length === 0) {
+      patientCareStatus = this.form.searchNodeByQuestionId('patientIssues');
     }
     return patientCareStatus;
   }
