@@ -2,8 +2,9 @@ import { NgModule } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
-import { EtlApi } from '../../etl-api/etl-api.module';
+
 import {
   AccordionModule, DataTableModule, SharedModule, TabViewModule,
   GrowlModule, PanelModule, ConfirmDialogModule, ConfirmationService,
@@ -12,7 +13,16 @@ import {
 } from 'primeng/primeng';
 import { Ng2Bs3ModalModule } from 'ng2-bs3-modal/ng2-bs3-modal';
 import { Angulartics2Module } from 'angulartics2';
+import { FormEntryModule } from 'ngx-openmrs-formentry';
+import { AgGridModule } from 'ag-grid-angular/main';
+import { NgxFileUploaderModule } from 'ngx-file-uploader';
+import { DateTimePickerModule } from 'ngx-openmrs-formentry';
+import { HttpModule, Http, XHRBackend, RequestOptions } from '@angular/http';
+import { Router } from '@angular/router';
+
+
 import { NgamrsSharedModule } from '../../shared/ngamrs-shared.module';
+import { EtlApi } from '../../etl-api/etl-api.module';
 import { PatientInfoComponent } from './patient-info/patient-info.component';
 import {
   PatientEncountersComponent
@@ -52,7 +62,6 @@ import { FormDataSourceService } from './formentry/form-data-source.service';
 import { FormentryComponent } from './formentry/formentry.component';
 import { PrettyEncounterViewerComponent } from './formentry/pretty-encounter-viewer.component';
 import { FormentryHelperService } from './formentry/formentry-helper.service';
-import { FormEntryModule } from 'ngx-openmrs-formentry/dist/ngx-formentry';
 import { FromentryGuard } from './formentry/formentry.guard';
 import { PatientPreviousEncounterService } from '../services/patient-previous-encounter.service';
 import {
@@ -92,14 +101,10 @@ import {
 import { PatientCareStatusResourceService } from '../../etl-api/patient-care-status-resource.service';
 import { PatientIdentifierService } from './patient-identifier/patient-identifiers.service';
 import { EditContactsComponent } from './patient-info/edit-contacts.component';
-import { AgGridModule } from 'ag-grid-angular/main';
-import { FileUploaderModule } from 'ngx-file-uploader';
-
 import {
   HivPatientClinicalSummaryService
 } from '../hiv/patient-clinical-summaries/hiv-patient-clinical-summary.service';
 import { EditDemographicsComponent } from './patient-info/edit-demographics.component';
-import { DateTimePickerModule } from 'ngx-openmrs-formentry/dist/ngx-formentry/';
 import { VisitPeriodComponent } from './visit/visit-period/visit-period.component';
 import { LocatorMapComponent } from './locator-map/locator-map.component';
 import { SecurePipe } from './locator-map/secure.pipe';
@@ -129,17 +134,14 @@ import { TodayVisitService } from './visit/today-visit.service';
 import { TodayVisitsComponent } from './visit/today-visits/today-visits.component';
 import { VisitSummaryComponent } from './visit/visit-summary/visit-summary.component';
 import { FormUpdaterService } from './formentry/form-updater.service';
-
-import { HttpModule, Http, XHRBackend, RequestOptions } from '@angular/http';
-import { Router } from '@angular/router';
 import { SessionStorageService } from '../../utils/session-storage.service';
 import { PatientImagingComponent } from './imaging/patient-imaging.component';
 import { ProgramManagerModule } from '../../program-manager/program-manager.module';
 import { ZscoreService } from '../../shared/services/zscore.service';
 import { GroupEnrollmentModule } from '../group-enrollment/group-enrollment.module';
 import { VitalsDatasource } from './todays-vitals/vitals.datasource';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { PocHttpInteceptor } from 'src/app/shared/services/poc-http-interceptor';
+import { LabResultImageModalComponent } from './lab-data-summary/lab-result-image-modal.component';
 
 @NgModule({
   imports: [
@@ -171,7 +173,7 @@ import { PocHttpInteceptor } from 'src/app/shared/services/poc-http-interceptor'
     AgGridModule.withComponents([
 
     ]),
-    FileUploaderModule,
+    NgxFileUploaderModule,
     CohortMemberModule,
     LabOrderSearchModule,
     HivCareLibModule,
@@ -190,6 +192,7 @@ import { PocHttpInteceptor } from 'src/app/shared/services/poc-http-interceptor'
     ClinicalNotesComponent,
     EncounterListComponent,
     VisitComponent,
+    LabResultImageModalComponent,
     PatientBannerComponent,
     LabSyncComponent,
     LabResultComponent,
@@ -250,6 +253,7 @@ import { PocHttpInteceptor } from 'src/app/shared/services/poc-http-interceptor'
     FormentryComponent,
     LabTestOrdersComponent,
     DraftedFormNavComponent,
+    LabResultImageModalComponent,
     TodaysVitalsComponent,
     PatientRemindersComponent,
     OrderListComponent,

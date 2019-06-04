@@ -1,16 +1,19 @@
-import {take} from 'rxjs/operators';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { PatientService } from '../../services/patient.service';
-import { LabsResourceService } from '../../../etl-api/labs-resource.service';
-import { SelectDepartmentService } from './../../../shared/services/select-department.service';
-import { ZeroVlPipe } from './../../../shared/pipes/zero-vl-pipe';
 import { ActivatedRoute } from '@angular/router';
 
+import { take } from 'rxjs/operators';
 import { GridOptions } from 'ag-grid/main';
 import 'ag-grid-enterprise/main';
 import * as Moment from 'moment';
 import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
+
+import { PatientService } from '../../services/patient.service';
+import { LabsResourceService } from '../../../etl-api/labs-resource.service';
+import { SelectDepartmentService } from '../../../shared/services/select-department.service';
+import { ZeroVlPipe } from '../../../shared/pipes/zero-vl-pipe';
+import { AppSettingsService } from 'src/app/app-settings/app-settings.service';
+import { FileUploadResourceService } from 'src/app/etl-api/file-upload-resource.service';
 
 @Component({
   selector: 'lab-result',
@@ -21,6 +24,9 @@ export class LabResultComponent implements OnInit, OnDestroy {
   public patient: any;
   public error: string;
   public loadingPatient: boolean;
+  public imageLinksAvailable = false;
+  public pdfLinks = [];
+  public pdfAvailable = false;
   public fetchingResults: boolean;
   public isLoading: boolean;
   public patientUuId: any;
@@ -31,6 +37,9 @@ export class LabResultComponent implements OnInit, OnDestroy {
   public labResults = [];
   public horizontalView = true;
   public subscription: Subscription;
+  public imageLinks = [];
+  public imageTitle = '';
+  public showImageModal = false;
   public gridOptions: GridOptions = {
     onGridSizeChanged: () => {
       if (this.gridOptions.api) {
@@ -44,7 +53,7 @@ export class LabResultComponent implements OnInit, OnDestroy {
       }
     },
     suppressHorizontalScroll: false,
-    enableSorting : true
+    enableSorting: true
   };
   public labCols: any;
 
@@ -53,13 +62,13 @@ export class LabResultComponent implements OnInit, OnDestroy {
   public labRowData: any;
 
   public generalRows = {
-    'tests_ordered' : {
+    'tests_ordered': {
       'test': 'Tests Ordered'
     },
-    'hiv_viral_load' : {
+    'hiv_viral_load': {
       'test': 'HIV VL'
     },
-    'hiv_dna_pcr' : {
+    'hiv_dna_pcr': {
       'test': 'DNA PCR'
     },
     'hiv_rapid_test': {
@@ -68,37 +77,43 @@ export class LabResultComponent implements OnInit, OnDestroy {
     'cd4_count': {
       'test': 'CD4'
     },
-    'cd4_percent' : {
+    'cd4_percent': {
       'test': 'CD4%'
     },
-    'hemoglobin' : {
+    'hemoglobin': {
       'test': 'Hb'
     },
-    'ast' : {
+    'ast': {
       'test': 'AST'
     },
-    'creatinine' : {
+    'creatinine': {
       'test': 'Cr'
     },
-    'chest_xray' : {
+    'chest_xray': {
       'test': 'CXR'
     },
-    'lab_errors' : {
+    'lab_errors': {
       'test': 'Lab Errors'
     },
-    'serum_crag' : {
-      'test' : 'Serum Crag'
+    'serum_crag': {
+      'test': 'Serum Crag'
+    },
+    'gene_expert_image': {
+      'test': 'GeneExpert Image'
+    },
+    'dst_image': {
+      'test': 'DST Image'
     }
   };
 
   public oncRows = {
-    'hiv_viral_load' : {
+    'hiv_viral_load': {
       'test': 'HIV VL'
     },
     'cd4_count': {
       'test': 'CD4'
     },
-    'cd4_percent' : {
+    'cd4_percent': {
       'test': 'CD4%'
     },
     'rbc': {
@@ -228,6 +243,8 @@ export class LabResultComponent implements OnInit, OnDestroy {
     private patientService: PatientService,
     private _route: ActivatedRoute,
     private zeroVlPipe: ZeroVlPipe,
+    private fileUploadResourceService: FileUploadResourceService,
+    private appSettingsService: AppSettingsService,
     private selectDepartmentService: SelectDepartmentService) {
     this.gridOptions = {} as GridOptions;
   }
@@ -235,17 +252,17 @@ export class LabResultComponent implements OnInit, OnDestroy {
   public ngOnInit() {
     this.loadingPatient = true;
     this.getCurrentDepartment();
-      this.subscription = this.patientService.currentlyLoadedPatient.subscribe(
-        (patient) => {
-          this.loadingPatient = false;
-          if (patient) {
-            this.patient = patient;
-            this.patientUuId = this.patient.person.uuid;
-            this.getHistoricalPatientLabResults(this.patientUuId,
-              { startIndex: this.nextStartIndex.toString(), limit: '20' });
-          }
+    this.subscription = this.patientService.currentlyLoadedPatient.subscribe(
+      (patient) => {
+        this.loadingPatient = false;
+        if (patient) {
+          this.patient = patient;
+          this.patientUuId = this.patient.person.uuid;
+          this.getHistoricalPatientLabResults(this.patientUuId,
+            { startIndex: this.nextStartIndex.toString(), limit: '20' });
         }
-      );
+      }
+    );
 
   }
 
@@ -256,22 +273,28 @@ export class LabResultComponent implements OnInit, OnDestroy {
   }
 
   public getCurrentDepartment() {
-      const defaultDepartment = this.selectDepartmentService.getUserSetDepartment();
-      this.currentDepartment = defaultDepartment;
-      this.setLabRows(this.currentDepartment);
-      this.setLabSummaryView();
+    const defaultDepartment = this.selectDepartmentService.getUserSetDepartment();
+    this.currentDepartment = defaultDepartment;
+    this.setLabRows(this.currentDepartment);
+    this.setLabSummaryView(this.currentDepartment);
   }
-  public setLabSummaryView() {
-    this.horizontalView = true;
+  public setLabSummaryView(department) {
+    switch (department) {
+      case 'HEMATO-ONCOLOGY':
+        this.horizontalView = true;
+        break;
+      default:
+        this.horizontalView = false;
+    }
   }
 
   public setLabRows(department) {
     switch (department) {
       case 'ONCOLOGY':
         this.labRows = this.oncRows;
-      break;
+        break;
       default:
-         this.labRows = this.generalRows;
+        this.labRows = this.generalRows;
     }
 
   }
@@ -310,7 +333,7 @@ export class LabResultComponent implements OnInit, OnDestroy {
   }
   public formatDateField(result) {
     const tests = [];
-    for (const  data of result) {
+    for (const data of result) {
       for (const r in data) {
         if (data.hasOwnProperty(r)) {
           const lab = Moment(data.test_datetime).format('DD-MM-YYYY');
@@ -333,9 +356,9 @@ export class LabResultComponent implements OnInit, OnDestroy {
   private createColumnDefs() {
     this.setLabRows(this.currentDepartment);
     if (this.horizontalView === true) {
-        this.createHorizontalColDef();
+      this.createHorizontalColDef();
     } else {
-        this.createVerticalCalDef();
+      this.createVerticalCalDef();
     }
 
   }
@@ -357,7 +380,7 @@ export class LabResultComponent implements OnInit, OnDestroy {
           if (!_.isEmpty(params.data.toolTip)) {
             return params.data.toolTip;
           } else {
-             return '';
+            return '';
           }
         }
       }
@@ -365,26 +388,28 @@ export class LabResultComponent implements OnInit, OnDestroy {
     ];
 
     _.each(this.labResults, (result: any) => {
-        const col = {
-          headerName: result.testDatetime,
-          width: 110,
-          field: result.testDatetime,
-          cellStyle: {
-            'text-align': 'left'
-          },
-          pinned: '',
-          tooltip: (params: any) => {
-            return '';
-          },
-          cellRenderer: (column: any) => {
-            if (column.colDef.field === 'hiv_viral_load') {
-              return this.zeroVlPipe.transform(column.value);
-            } else {
-                return column.value;
-            }
+      const col = {
+        headerName: result.testDatetime,
+        width: 110,
+        field: result.testDatetime,
+        cellStyle: {
+          'text-align': 'left'
+        },
+        pinned: '',
+        tooltip: (params: any) => {
+          return '';
+        },
+        cellRenderer: (column: any) => {
+          if (column.data.test === 'HIV VL') {
+            return this.zeroVlPipe.transform(column.value);
+          } else if (column.data.test === 'GeneExpert Image' || column.data.test === 'DST Image') {
+            return this.transFormImageCol(column.value);
+          } else {
+            return column.value;
           }
-        };
-        cols.push(col);
+        }
+      };
+      cols.push(col);
     });
 
     this.labCols = cols;
@@ -395,7 +420,7 @@ export class LabResultComponent implements OnInit, OnDestroy {
   }
 
   public createVerticalCalDef() {
-     // Date is the y-axis and Labtest are the x-axis
+    // Date is the y-axis and Labtest are the x-axis
 
 
     const verticalCols = this.labRows;
@@ -405,7 +430,7 @@ export class LabResultComponent implements OnInit, OnDestroy {
         headerName: 'Date',
         width: 200,
         field: 'testDatetime',
-        pinned : 'left',
+        pinned: 'left',
         cellStyle: {
           'text-align': 'left'
         },
@@ -413,7 +438,7 @@ export class LabResultComponent implements OnInit, OnDestroy {
           if (!_.isEmpty(params.data.toolTip)) {
             return params.data.toolTip;
           } else {
-             return '';
+            return '';
           }
         }
       }
@@ -422,81 +447,101 @@ export class LabResultComponent implements OnInit, OnDestroy {
 
     Object.keys(verticalCols).forEach((key, index) => {
       if (verticalCols.hasOwnProperty('' + key + '')) {
-        if (key !== 'testDatetime' && key !== 'hiv_viral_load' && key !== 'serum_crag') {
+        if (key !== 'testDatetime' && key !== 'hiv_viral_load' && key !== 'serum_crag'
+          && key !== 'gene_expert_image' && key !== 'dst_image') {
 
-        const col = {
-          headerName: verticalCols[key].test,
-          width: 150,
-          pinned : '',
-          field: key,
-          cellStyle: {
-            'text-align': 'left'
-          },
-          tooltip: (params: any) => {
-            if (!_.isEmpty(params.data.toolTip)) {
-              return params.data.toolTip;
-            } else {
-               return '';
+          const col = {
+            headerName: verticalCols[key].test,
+            width: 150,
+            pinned: '',
+            field: key,
+            cellStyle: {
+              'text-align': 'left'
+            },
+            tooltip: (params: any) => {
+              if (!_.isEmpty(params.data.toolTip)) {
+                return params.data.toolTip;
+              } else {
+                return '';
+              }
             }
-          }
-        };
+          };
 
-        cols.push(col);
+          cols.push(col);
 
-      }
-      if (key === 'hiv_viral_load') {
+        }
+        if (key === 'hiv_viral_load') {
 
-        const col = {
-          headerName: verticalCols[key].test,
-          width: 150,
-          pinned : '',
-          field: key,
-          cellStyle: {
-            'text-align': 'left'
-          },
-          tooltip: (params: any) => {
-          },
-          cellRenderer: (column) => {
-            if (typeof column.value !== 'undefined') {
+          const col = {
+            headerName: verticalCols[key].test,
+            width: 150,
+            pinned: '',
+            field: key,
+            cellStyle: {
+              'text-align': 'left'
+            },
+            tooltip: (params: any) => {
+            },
+            cellRenderer: (column) => {
+              if (typeof column.value !== 'undefined') {
                 return this.zeroVlPipe.transform(column.value);
-            } else {
+              } else {
                 return column.value;
+              }
             }
-          }
-        };
+          };
 
-        cols.push(col);
+          cols.push(col);
 
-      }
-      if (key === 'serum_crag') {
+        }
+        if (key === 'serum_crag') {
 
-        const col = {
-          headerName: verticalCols[key].test,
-          width: 200,
-          pinned : '',
-          field: key,
-          cellStyle: {
-            'text-align': 'left'
-          },
-          tooltip: (params: any) => {
-          },
-          cellRenderer: (column) => {
-            if (typeof column.value !== 'undefined') {
+          const col = {
+            headerName: verticalCols[key].test,
+            width: 200,
+            pinned: '',
+            field: key,
+            cellStyle: {
+              'text-align': 'left'
+            },
+            tooltip: (params: any) => {
+            },
+            cellRenderer: (column) => {
+              if (typeof column.value !== 'undefined') {
                 return this.transformSerumCrug(column.value);
-            } else {
+              } else {
                 return column.value;
+              }
             }
-          }
-        };
+          };
 
-        cols.push(col);
+          cols.push(col);
+        }
+        if (key === 'gene_expert_image' || key === 'dst_image') {
 
+          const col = {
+            headerName: verticalCols[key].test,
+            width: 200,
+            pinned: '',
+            field: key,
+            cellStyle: {
+              'text-align': 'left'
+            },
+            tooltip: (params: any) => {
+            },
+            cellRenderer: (column) => {
+              return this.transFormImageCol(column.value);
+            }
+          };
+
+          cols.push(col);
+
+        }
       }
-      }
-     });
+    });
 
-     this.labCols = cols;
-     this.labRowData = this.labResults;
+    this.labCols = cols;
+    this.labRowData = this.labResults;
 
   }
 
@@ -519,7 +564,7 @@ export class LabResultComponent implements OnInit, OnDestroy {
       });
     });
 
-     this.processRowData(rowData);
+    this.processRowData(rowData);
 
   }
 
@@ -537,8 +582,8 @@ export class LabResultComponent implements OnInit, OnDestroy {
   }
 
   public toggleView() {
-      this.horizontalView = !this.horizontalView;
-      this.createColumnDefs();
+    this.horizontalView = !this.horizontalView;
+    this.createColumnDefs();
   }
 
   public transformSerumCrug(value) {
@@ -553,5 +598,66 @@ export class LabResultComponent implements OnInit, OnDestroy {
     } else {
       return null;
     }
+  }
+
+  public transFormImageCol(value) {
+
+    let colValue;
+
+    if (typeof value !== 'undefined' && value !== null) {
+      colValue = '<a>View</a>';
+    } else {
+      colValue = null;
+    }
+
+    return colValue;
+
+  }
+
+  public cellClicked($event: any) {
+    console.log($event);
+    if ($event.colDef.field === 'gene_expert_image' || $event.colDef.field === 'dst_image') {
+      this.showModal($event.value);
+      this.imageTitle = $event.colDef.headerName;
+
+    } else if ($event.data.test === 'GeneExpert Image' || $event.data.test === 'DST Image') {
+      this.showModal($event.value);
+      this.imageTitle = $event.data.test;
+    } else {
+      return false;
+    }
+  }
+
+  public showModal(image) {
+    this.imageLinks = [];
+    this.pdfLinks = [];
+    let imageLinks = image.split('##');
+    imageLinks = imageLinks.map((imageFile) => {
+      return imageFile.replace(/\s/g, '');
+    });
+    this.imageLinks.push(imageLinks);
+    for (let i = 0; i < this.imageLinks.length; i++) {
+      const re = /pdf/gi;
+      if (JSON.stringify(this.imageLinks[i]).search(re) === -1) {
+        this.imageLinksAvailable = true;
+      } else {
+        this.pdfAvailable = true;
+        this.createPdfLink(this.imageLinks[i]);
+        this.imageLinks.splice(i, 1);
+      }
+    }
+    this.showImageModal = true;
+  }
+  public createPdfLink(imageName) {
+    this.fileUploadResourceService.getFile(imageName, 'pdf').subscribe((file) => {
+      this.pdfAvailable = true;
+      this.pdfLinks.push(file.changingThisBreaksApplicationSecurity);
+    });
+  }
+
+  public modalClose($event) {
+    this.showImageModal = false;
+    this.imageTitle = '';
+    this.imageLinks = [];
   }
 }
