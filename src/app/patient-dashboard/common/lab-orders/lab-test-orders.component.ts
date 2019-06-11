@@ -108,8 +108,6 @@ export class LabTestOrdersComponent implements OnInit, OnDestroy {
     const patientUuId = this.patient.uuid;
     this.orderResourceService.getOrdersByPatientUuid(patientUuId).pipe(
       take(1)).subscribe((result) => {
-        console.log('result', result);
-        // this.getCorrespingLabOrdersFromAmrs(result.results);
         this.labPatient = result.results[0].patient;
         this.labEncouonters = result.results;
         this.labOrders = result.results;
@@ -139,7 +137,6 @@ export class LabTestOrdersComponent implements OnInit, OnDestroy {
     this.clinicLabOrdersResourceService.getLabOrdersByPatientUuid(patientUuId).pipe(
       take(1)).subscribe((result) => {
         this.labOrdersEtl = result;
-        console.log('this.labOrdersEtl', this.labOrdersEtl);
         this.labOrdersEtl.sort((a, b) => {
           const key1 = a.date_activated;
           const key2 = b.date_activated;
@@ -241,6 +238,7 @@ export class LabTestOrdersComponent implements OnInit, OnDestroy {
             this.getCurrentlyLoadedPatient();
             this.getLabOrdersByPatientUuid();
             setTimeout(() => {
+              this.patientService.reloadCurrentPatient();
               this.displaySampleDialog = false;
             }, 1000);
 
@@ -265,6 +263,7 @@ export class LabTestOrdersComponent implements OnInit, OnDestroy {
           this.getCurrentlyLoadedPatient();
           this.getLabOrdersByPatientUuid();
           setTimeout(() => {
+            this.patientService.reloadCurrentPatient();
             this.displaySampleDialog = false;
           }, 1000);
         }
